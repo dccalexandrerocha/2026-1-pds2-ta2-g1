@@ -1,0 +1,26 @@
+================================================================================
+  CLASSE: TopologiaDeRede                   CATEGORIA: Estrutura de Dados
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Conhecimento]                          ║  → No                               ║
+║  1. Conhecer o conjunto de nós           ║  → Enlace                           ║
+║     (hosts, roteadores, switches).       ║  → ProtocoloDeRoteamento            ║
+║  2. Conhecer o conjunto de enlaces e     ║  → Simulador                        ║
+║     suas propriedades (capacidade,       ║                                     ║
+║     tipo, estado).                       ║                                     ║
+║  3. Conhecer a lista de adjacência       ║                                     ║
+║     para consulta de vizinhos.           ║                                     ║
+║                                          ║                                     ║
+║  [Realização]                            ║                                     ║
+║  4. Adicionar e remover nós e enlaces    ║                                     ║
+║     dinamicamente durante a simulação.   ║                                     ║
+║  5. Validar a conectividade geral da     ║                                     ║
+║     topologia antes do início.           ║                                     ║
+║  6. Serializar e desserializar a         ║                                     ║
+║     estrutura em JSON/XML.               ║                                     ║
+║  7. Fornecer o grafo ponderado ao        ║                                     ║
+║     protocolo de roteamento ativo.       ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝

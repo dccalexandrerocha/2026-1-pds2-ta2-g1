@@ -1,0 +1,27 @@
+================================================================================
+  CLASSE: EscalonadorDeEventos              CATEGORIA: Controle
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Conhecimento]                          ║  → Simulador                        ║
+║  1. Conhecer a fila de eventos           ║  → No                               ║
+║     ordenada por tempo de ocorrência.    ║  → Enlace                           ║
+║  2. Conhecer o instante de tempo         ║  → GerenciadorDeFalhas              ║
+║     global atual da simulação.           ║  → ColetorDeMetricas                ║
+║                                          ║                                     ║
+║  [Realização]                            ║                                     ║
+║  3. Inserir novos eventos na fila com    ║                                     ║
+║     tempo de disparo correto.            ║                                     ║
+║  4. Cancelar eventos pendentes quando    ║                                     ║
+║     necessário.                          ║                                     ║
+║  5. Processar e despachar o próximo      ║                                     ║
+║     evento para o componente             ║                                     ║
+║     responsável.                         ║                                     ║
+║  6. Avançar o relógio global ao          ║                                     ║
+║     instante do próximo evento.          ║                                     ║
+║  7. Gerenciar eventos periódicos         ║                                     ║
+║     (ex.: coleta de métricas a cada      ║                                     ║
+║     N ms simulados).                     ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝

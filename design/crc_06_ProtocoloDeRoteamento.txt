@@ -1,0 +1,26 @@
+================================================================================
+  CLASSE: ProtocoloDeRoteamento             CATEGORIA: Estratégia
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Conhecimento]                          ║  → TopologiaDeRede                  ║
+║  1. Conhecer o algoritmo ativo           ║  → No                               ║
+║     (RIP, OSPF, BGP ou personalizado).   ║  → Enlace                           ║
+║  2. Conhecer os parâmetros configurados  ║  → Simulador                        ║
+║     (métrica, temporizadores, pesos).    ║                                     ║
+║                                          ║                                     ║
+║  [Realização]                            ║                                     ║
+║  3. Calcular o caminho ótimo entre dois  ║                                     ║
+║     nós dado o estado atual da           ║                                     ║
+║     topologia.                           ║                                     ║
+║  4. Atualizar as tabelas de roteamento   ║                                     ║
+║     de todos os nós afetados por         ║                                     ║
+║     mudança de topologia.                ║                                     ║
+║  5. Simular o processo de convergência   ║                                     ║
+║     após falha ou adição de enlace.      ║                                     ║
+║  6. Expor a tabela de roteamento de      ║                                     ║
+║     cada nó para consulta e              ║                                     ║
+║     visualização.                        ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝

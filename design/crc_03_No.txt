@@ -1,0 +1,27 @@
+================================================================================
+  CLASSE: No                                CATEGORIA: Entidade de Rede
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Conhecimento]                          ║  → Enlace                           ║
+║  1. Conhecer seu identificador único,    ║  → ProtocoloDeRoteamento            ║
+║     tipo (host, roteador, switch)        ║  → Pacote                           ║
+║     e endereço.                          ║  → ColetorDeMetricas                ║
+║  2. Conhecer sua tabela de roteamento    ║                                     ║
+║     local.                               ║                                     ║
+║  3. Conhecer seu estado atual            ║                                     ║
+║     (ativo, falho, em recuperação).      ║                                     ║
+║                                          ║                                     ║
+║  [Realização]                            ║                                     ║
+║  4. Receber pacotes das interfaces de    ║                                     ║
+║     rede conectadas.                     ║                                     ║
+║  5. Encaminhar pacotes com base na       ║                                     ║
+║     tabela de roteamento.                ║                                     ║
+║  6. Atualizar a tabela de roteamento     ║                                     ║
+║     quando notificado pelo protocolo.    ║                                     ║
+║  7. Registrar estatísticas locais de     ║                                     ║
+║     pacotes recebidos, enviados e        ║                                     ║
+║     descartados.                         ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝

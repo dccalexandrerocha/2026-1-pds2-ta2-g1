@@ -1,0 +1,29 @@
+================================================================================
+  CLASSE: Simulador                          CATEGORIA: Controle/Orquestrador
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Conhecimento]                          ║  → EscalonadorDeEventos             ║
+║  1. Conhecer o estado atual da           ║  → TopologiaDeRede                  ║
+║     simulação (parado, em execução,      ║  → ColetorDeMetricas                ║
+║     pausado, encerrado).                 ║  → LogDeEventos                     ║
+║  2. Conhecer a topologia de rede         ║                                     ║
+║     carregada para execução.             ║                                     ║
+║  3. Conhecer a velocidade e o passo      ║                                     ║
+║     de tempo configurados.               ║                                     ║
+║                                          ║                                     ║
+║  [Realização]                            ║                                     ║
+║  4. Iniciar, pausar, retomar e           ║                                     ║
+║     encerrar o ciclo de simulação.       ║                                     ║
+║  5. Coordenar a progressão do tempo      ║                                     ║
+║     global de simulação.                 ║                                     ║
+║  6. Notificar observadores registrados   ║                                     ║
+║     sobre mudanças de estado e eventos   ║                                     ║
+║     críticos.                            ║                                     ║
+║  7. Delegar o processamento de cada      ║                                     ║
+║     passo de tempo ao Escalonador.       ║                                     ║
+║  8. Acionar a coleta de métricas ao      ║                                     ║
+║     final de cada intervalo configurado. ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝

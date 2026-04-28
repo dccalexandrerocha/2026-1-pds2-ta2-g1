@@ -1,0 +1,29 @@
+================================================================================
+  CLASSE: ColetorDeMetricas                 CATEGORIA: Observação/Relatório
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Conhecimento]                          ║  → Simulador                        ║
+║  1. Conhecer os intervalos de            ║  → No                               ║
+║     amostragem configurados.             ║  → Enlace                           ║
+║  2. Conhecer as séries temporais de      ║  → GeradorDeRelatorio               ║
+║     métricas coletadas durante a         ║                                     ║
+║     simulação.                           ║                                     ║
+║                                          ║                                     ║
+║  [Realização]                            ║                                     ║
+║  3. Registrar amostras de latência,      ║                                     ║
+║     throughput e perda de pacotes        ║                                     ║
+║     por enlace e nó.                     ║                                     ║
+║  4. Calcular estatísticas agregadas:     ║                                     ║
+║     média, mínimo, máximo e desvio       ║                                     ║
+║     padrão.                              ║                                     ║
+║  5. Fornecer dados ao painel de          ║                                     ║
+║     monitoramento em tempo real.         ║                                     ║
+║  6. Exportar dados coletados em CSV      ║                                     ║
+║     ou JSON ao fim da simulação.         ║                                     ║
+║  7. Sinalizar ao Simulador quando um     ║                                     ║
+║     limiar crítico de métrica for        ║                                     ║
+║     ultrapassado.                        ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝

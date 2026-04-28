@@ -1,0 +1,28 @@
+================================================================================
+  CLASSE: Enlace                            CATEGORIA: Entidade de Rede
+================================================================================
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Conhecimento]                          ║  → No                               ║
+║  1. Conhecer os dois nós extremos e a    ║  → Pacote                           ║
+║     direção do enlace.                   ║  → ColetorDeMetricas                ║
+║  2. Conhecer largura de banda máxima,    ║  → GerenciadorDeFalhas              ║
+║     latência base e tipo de meio.        ║                                     ║
+║  3. Conhecer a taxa de ocupação atual    ║                                     ║
+║     (utilização percentual).             ║                                     ║
+║  4. Conhecer seu estado atual            ║                                     ║
+║     (ativo ou falho).                    ║                                     ║
+║                                          ║                                     ║
+║  [Realização]                            ║                                     ║
+║  5. Transmitir pacotes respeitando a     ║                                     ║
+║     capacidade e introduzindo atraso     ║                                     ║
+║     de propagação.                       ║                                     ║
+║  6. Simular perda de pacotes conforme    ║                                     ║
+║     taxa de erro configurada.            ║                                     ║
+║  7. Notificar o Simulador ao atingir     ║                                     ║
+║     estado de congestionamento.          ║                                     ║
+║  8. Reportar métricas de uso ao          ║                                     ║
+║     ColetorDeMetricas periodicamente.    ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝
