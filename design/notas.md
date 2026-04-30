@@ -1,0 +1,14 @@
+ - a formatação em txt ficou legal, mas em markdown ficaria ainda melhor. recomendo ver isso depois.
+ - o uso de IDs é legal. espero ver esses IDs nas próximas entregas :)
+ - US01: no critério de aceitação vocês falam de uma "área de desenho visual". vocês planejam implementar uma GUI?
+ - user stories: temos como atores: Engenheiro de Redes, Pesquisador, Analista de Desempenho, Engenheiro de Confiabilidade, Professor / Coordenador de Projeto, e Estudante de Redes. para que implementar todos esses tipos de usuários diferentes?
+ - US01: vocês querem salvar a topologia da rede em dois formatos diferentes: JSON e XML? ótimo para um sistema real, mas trabalhoso demais para este projeto.
+ - US02: como vocês planejam controlar o tempo de simulação? a ideia seria um projeto simples, talvez com um "enter" por unidade de tempo.
+ - US03: gráficos atualizados a cada 100ms? isso já está se tornando um sistema com multithreading e várias janelas, muito além do esperado para o projeto.
+ - US04: critérios de aceitação 1 e 2 são basicamente o mesmo. além disso, vocês estão propondo a implementação de algo muito mais complexo do que o necessário. abrir o critério 1 seria suficiente.
+ - US05: trabalhar na geração de bons gráficos para relatórios não é uma tarefa trivial, muito menos gerar um pdf de forma adequada (pesquise sobre latex). gerar um relatório em csv não faz muito sentido.
+ - US06: vocês gostariam de implementar e testar 3 algoritmos de roteamento diferentes? novamente, muito interessante, porém acho bem difícil conseguir implementar isso até o fim do semestre.
+ - US07: como vocês esperam fazer a comparação entre cenários diferentes? mais uma GUI? além disso, o arquivo de saída será comprimido?
+ - crc: várias colaborações para classes que não existem: LogDeEventos, GeradorDeRelatório, GerenciadorDeFalhas, Pacote
+ - crc: o sistema proposto nas user stories foi tão complexo que os crc parecem incompletos.
+ - notas gerais: o sistema especificado pelas user stories parece ser muito interessante, mas pouco provável de ser implementado até o fim do semestre. já os crc não descrevem detalhes suficientes para a implementação do proposto nas user stories. adicionalmente, não consegui encontrar boas oportunidades de hierarquia no sistema proposto. dado que este documento deveria servir de base para a implementação do próximo checkpoint, acho muito difícil vocês conseguirem avançar de forma significativa no projeto com esta modelagem, com o fim de entregar o projeto em 2 meses. embora a entrega do checkpoint tenha sido considerada, recomendo fortemente que vocês se juntem e refaçam os dois documentos antes de começar a próxima entrega.
