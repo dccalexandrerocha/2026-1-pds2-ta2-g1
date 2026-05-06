@@ -1,26 +1,54 @@
 ================================================================================
-  CLASSE: ProtocoloDeRoteamento             CATEGORIA: Estratégia
+  CLASSE: ProtocoloDeRoteamento             CATEGORIA: Estrategia (Classe Base)
 ================================================================================
+
+  [US relacionadas: US03, US04]
+
+  Nota: ProtocoloDeRoteamento e uma classe base abstrata que define a interface
+  comum para algoritmos de roteamento. A subclasse concreta implementada neste
+  projeto e:
+    - RoteamentoDijkstra : calcula o caminho mais curto pelo algoritmo de
+                           Dijkstra, usando os pesos (latencia) dos enlaces.
+
+  Novas variações de algoritmo podem ser adicionadas no futuro como novas
+  subclasses, sem modificar o restante do sistema (princípio Open/Closed).
 
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
 ║                                          ║                                     ║
 ║  [Conhecimento]                          ║  → TopologiaDeRede                  ║
-║  1. Conhecer o algoritmo ativo           ║  → No                               ║
-║     (RIP, OSPF, BGP ou personalizado).   ║  → Enlace                           ║
-║  2. Conhecer os parâmetros configurados  ║  → Simulador                        ║
-║     (métrica, temporizadores, pesos).    ║                                     ║
+║  1. Conhecer os pesos utilizados como    ║  → No                               ║
+║     métrica de roteamento (latência      ║  → Enlace                           ║
+║     base dos enlaces).                   ║                                     ║
 ║                                          ║                                     ║
 ║  [Realização]                            ║                                     ║
-║  3. Calcular o caminho ótimo entre dois  ║                                     ║
-║     nós dado o estado atual da           ║                                     ║
-║     topologia.                           ║                                     ║
-║  4. Atualizar as tabelas de roteamento   ║                                     ║
-║     de todos os nós afetados por         ║                                     ║
-║     mudança de topologia.                ║                                     ║
-║  5. Simular o processo de convergência   ║                                     ║
-║     após falha ou adição de enlace.      ║                                     ║
-║  6. Expor a tabela de roteamento de      ║                                     ║
-║     cada nó para consulta e              ║                                     ║
-║     visualização.                        ║                                     ║
+║  2. Calcular (método abstrato) o         ║                                     ║
+║     caminho ótimo entre dois nós dado    ║                                     ║
+║     o estado atual da topologia.         ║                                     ║
+║  3. Atualizar as tabelas de roteamento   ║                                     ║
+║     de todos os nós afetados após        ║                                     ║
+║     mudança de estado de um enlace.      ║                                     ║
+║  4. Ignorar enlaces no estado falho      ║                                     ║
+║     durante o cálculo de rotas.          ║                                     ║
+║  5. Expor a tabela de roteamento de      ║                                     ║
+║     um nó para exibição no terminal.     ║                                     ║
+╚══════════════════════════════════════════╩═════════════════════════════════════╝
+
+
+================================================================================
+  SUBCLASSE: RoteamentoDijkstra             CATEGORIA: Estrategia (Concreta)
+================================================================================
+
+  Herda de: ProtocoloDeRoteamento
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  RESPONSABILIDADES ADICIONAIS            ║  COLABORAÇÕES                       ║
+║                                          ║                                     ║
+║  [Realização]                            ║  (herda de ProtocoloDeRoteamento)   ║
+║  1. Implementar o algoritmo de           ║                                     ║
+║     Dijkstra sobre o grafo ponderado     ║                                     ║
+║     fornecido pela TopologiaDeRede.      ║                                     ║
+║  2. Retornar o caminho mínimo como       ║                                     ║
+║     sequência ordenada de nós e          ║                                     ║
+║     enlaces.                             ║                                     ║
 ╚══════════════════════════════════════════╩═════════════════════════════════════╝

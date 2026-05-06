@@ -1,29 +1,34 @@
 ================================================================================
-  CLASSE: ColetorDeMetricas                 CATEGORIA: Observação/Relatório
+  CLASSE: ColetorDeMetricas                 CATEGORIA: Observacao/Relatorio
 ================================================================================
+
+  [US relacionadas: US05]
 
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
 ║                                          ║                                     ║
 ║  [Conhecimento]                          ║  → Simulador                        ║
-║  1. Conhecer os intervalos de            ║  → No                               ║
-║     amostragem configurados.             ║  → Enlace                           ║
-║  2. Conhecer as séries temporais de      ║  → GeradorDeRelatorio               ║
-║     métricas coletadas durante a         ║                                     ║
-║     simulação.                           ║                                     ║
+║  1. Conhecer os contadores acumulados    ║  → No                               ║
+║     de pacotes (transmitidos,            ║  → Enlace                           ║
+║     descartados, entregues) por          ║                                     ║
+║     enlace e por nó.                     ║                                     ║
+║  2. Conhecer o histórico de ocupação     ║                                     ║
+║     de cada enlace ao longo dos          ║                                     ║
+║     passos de tempo simulados.           ║                                     ║
 ║                                          ║                                     ║
 ║  [Realização]                            ║                                     ║
-║  3. Registrar amostras de latência,      ║                                     ║
-║     throughput e perda de pacotes        ║                                     ║
-║     por enlace e nó.                     ║                                     ║
-║  4. Calcular estatísticas agregadas:     ║                                     ║
-║     média, mínimo, máximo e desvio       ║                                     ║
-║     padrão.                              ║                                     ║
-║  5. Fornecer dados ao painel de          ║                                     ║
-║     monitoramento em tempo real.         ║                                     ║
-║  6. Exportar dados coletados em CSV      ║                                     ║
-║     ou JSON ao fim da simulação.         ║                                     ║
-║  7. Sinalizar ao Simulador quando um     ║                                     ║
-║     limiar crítico de métrica for        ║                                     ║
-║     ultrapassado.                        ║                                     ║
+║  3. Registrar, a cada passo de tempo,    ║                                     ║
+║     os contadores reportados por cada    ║                                     ║
+║     Enlace e Nó.                         ║                                     ║
+║  4. Calcular, ao fim da simulação,       ║                                     ║
+║     a taxa de utilização média e o       ║                                     ║
+║     valor máximo de ocupação por         ║                                     ║
+║     enlace.                              ║                                     ║
+║  5. Exibir no terminal as métricas por   ║                                     ║
+║     enlace/nó e os totais globais da     ║                                     ║
+║     simulação sob comando do usuário     ║                                     ║
+║     ou ao encerrar.                      ║                                     ║
+║  6. Exportar os dados coletados em       ║                                     ║
+║     arquivo CSV (uma linha por           ║                                     ║
+║     enlace ou nó).                       ║                                     ║
 ╚══════════════════════════════════════════╩═════════════════════════════════════╝

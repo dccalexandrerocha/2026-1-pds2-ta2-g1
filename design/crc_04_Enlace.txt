@@ -2,27 +2,33 @@
   CLASSE: Enlace                            CATEGORIA: Entidade de Rede
 ================================================================================
 
+  [US relacionadas: US01, US03, US04, US05]
+
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
 ║                                          ║                                     ║
 ║  [Conhecimento]                          ║  → No                               ║
-║  1. Conhecer os dois nós extremos e a    ║  → Pacote                           ║
-║     direção do enlace.                   ║  → ColetorDeMetricas                ║
-║  2. Conhecer largura de banda máxima,    ║  → GerenciadorDeFalhas              ║
-║     latência base e tipo de meio.        ║                                     ║
+║  1. Conhecer os dois nós extremos do     ║  → ColetorDeMetricas                ║
+║     enlace e a direção (bidirecional     ║                                     ║
+║     ou unidirecional).                   ║                                     ║
+║  2. Conhecer largura de banda máxima     ║                                     ║
+║     e latência base.                     ║                                     ║
 ║  3. Conhecer a taxa de ocupação atual    ║                                     ║
-║     (utilização percentual).             ║                                     ║
+║     (pacotes transmitidos / capacidade). ║                                     ║
 ║  4. Conhecer seu estado atual            ║                                     ║
 ║     (ativo ou falho).                    ║                                     ║
 ║                                          ║                                     ║
 ║  [Realização]                            ║                                     ║
 ║  5. Transmitir pacotes respeitando a     ║                                     ║
-║     capacidade e introduzindo atraso     ║                                     ║
-║     de propagação.                       ║                                     ║
-║  6. Simular perda de pacotes conforme    ║                                     ║
-║     taxa de erro configurada.            ║                                     ║
-║  7. Notificar o Simulador ao atingir     ║                                     ║
-║     estado de congestionamento.          ║                                     ║
-║  8. Reportar métricas de uso ao          ║                                     ║
-║     ColetorDeMetricas periodicamente.    ║                                     ║
+║     capacidade e introduzindo o atraso   ║                                     ║
+║     de propagação configurado.           ║                                     ║
+║  6. Descartar pacotes quando o enlace    ║                                     ║
+║     está no estado falho, registrando    ║                                     ║
+║     o descarte no terminal.              ║                                     ║
+║  7. Permitir que seu estado seja         ║                                     ║
+║     alterado para falho ou ativo pelo    ║                                     ║
+║     EscalonadorDeEventos.                ║                                     ║
+║  8. Reportar contadores de uso ao        ║                                     ║
+║     ColetorDeMetricas ao fim de          ║                                     ║
+║     cada passo de tempo.                 ║                                     ║
 ╚══════════════════════════════════════════╩═════════════════════════════════════╝

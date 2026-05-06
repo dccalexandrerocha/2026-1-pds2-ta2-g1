@@ -2,26 +2,38 @@
   CLASSE: No                                CATEGORIA: Entidade de Rede
 ================================================================================
 
+  [US relacionadas: US01, US03]
+
+  Nota: No e uma classe base abstrata. As subclasses concretas sao:
+    - Host      : no de origem/destino de pacotes; nao encaminha.
+    - Roteador  : encaminha pacotes usando tabela de roteamento.
+    - Switch    : encaminha pacotes por endereco de enlace (camada 2).
+
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
 ║                                          ║                                     ║
 ║  [Conhecimento]                          ║  → Enlace                           ║
 ║  1. Conhecer seu identificador único,    ║  → ProtocoloDeRoteamento            ║
-║     tipo (host, roteador, switch)        ║  → Pacote                           ║
-║     e endereço.                          ║  → ColetorDeMetricas                ║
-║  2. Conhecer sua tabela de roteamento    ║                                     ║
-║     local.                               ║                                     ║
+║     tipo (host, roteador, switch)        ║  → ColetorDeMetricas                ║
+║     e endereço IP.                       ║                                     ║
+║  2. Conhecer os enlaces conectados       ║                                     ║
+║     às suas interfaces.                  ║                                     ║
 ║  3. Conhecer seu estado atual            ║                                     ║
-║     (ativo, falho, em recuperação).      ║                                     ║
+║     (ativo ou falho).                    ║                                     ║
 ║                                          ║                                     ║
 ║  [Realização]                            ║                                     ║
-║  4. Receber pacotes das interfaces de    ║                                     ║
-║     rede conectadas.                     ║                                     ║
-║  5. Encaminhar pacotes com base na       ║                                     ║
-║     tabela de roteamento.                ║                                     ║
+║  4. Receber pacotes (representados       ║                                     ║
+║     como estruturas de dados) pelas      ║                                     ║
+║     interfaces conectadas.               ║                                     ║
+║  5. Encaminhar pacotes para o enlace     ║                                     ║
+║     correto com base na tabela de        ║                                     ║
+║     roteamento local (subclasses         ║                                     ║
+║     implementam o comportamento          ║                                     ║
+║     específico).                         ║                                     ║
 ║  6. Atualizar a tabela de roteamento     ║                                     ║
-║     quando notificado pelo protocolo.    ║                                     ║
-║  7. Registrar estatísticas locais de     ║                                     ║
+║     local quando notificado pelo         ║                                     ║
+║     ProtocoloDeRoteamento.               ║                                     ║
+║  7. Registrar contadores locais de       ║                                     ║
 ║     pacotes recebidos, enviados e        ║                                     ║
 ║     descartados.                         ║                                     ║
 ╚══════════════════════════════════════════╩═════════════════════════════════════╝

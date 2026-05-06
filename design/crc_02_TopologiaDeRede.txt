@@ -2,25 +2,30 @@
   CLASSE: TopologiaDeRede                   CATEGORIA: Estrutura de Dados
 ================================================================================
 
+  [US relacionadas: US01, US03]
+
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
 ║                                          ║                                     ║
 ║  [Conhecimento]                          ║  → No                               ║
 ║  1. Conhecer o conjunto de nós           ║  → Enlace                           ║
-║     (hosts, roteadores, switches).       ║  → ProtocoloDeRoteamento            ║
-║  2. Conhecer o conjunto de enlaces e     ║  → Simulador                        ║
-║     suas propriedades (capacidade,       ║                                     ║
-║     tipo, estado).                       ║                                     ║
+║     (hosts, roteadores, switches)        ║  → ProtocoloDeRoteamento            ║
+║     indexados por ID único.              ║  → Simulador                        ║
+║  2. Conhecer o conjunto de enlaces e     ║                                     ║
+║     suas propriedades (largura de        ║                                     ║
+║     banda, latência base, estado).       ║                                     ║
 ║  3. Conhecer a lista de adjacência       ║                                     ║
 ║     para consulta de vizinhos.           ║                                     ║
 ║                                          ║                                     ║
 ║  [Realização]                            ║                                     ║
 ║  4. Adicionar e remover nós e enlaces    ║                                     ║
-║     dinamicamente durante a simulação.   ║                                     ║
+║     via comandos de texto (CLI).         ║                                     ║
 ║  5. Validar a conectividade geral da     ║                                     ║
-║     topologia antes do início.           ║                                     ║
+║     topologia antes do início,           ║                                     ║
+║     listando nós isolados no terminal.   ║                                     ║
 ║  6. Serializar e desserializar a         ║                                     ║
-║     estrutura em JSON/XML.               ║                                     ║
+║     estrutura em formato JSON.           ║                                     ║
 ║  7. Fornecer o grafo ponderado ao        ║                                     ║
-║     protocolo de roteamento ativo.       ║                                     ║
+║     ProtocoloDeRoteamento para           ║                                     ║
+║     cálculo de rotas.                    ║                                     ║
 ╚══════════════════════════════════════════╩═════════════════════════════════════╝

@@ -2,28 +2,32 @@
   CLASSE: Simulador                          CATEGORIA: Controle/Orquestrador
 ================================================================================
 
+  [US relacionadas: US02]
+
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║  RESPONSABILIDADES                       ║  COLABORAÇÕES                       ║
 ║                                          ║                                     ║
 ║  [Conhecimento]                          ║  → EscalonadorDeEventos             ║
 ║  1. Conhecer o estado atual da           ║  → TopologiaDeRede                  ║
 ║     simulação (parado, em execução,      ║  → ColetorDeMetricas                ║
-║     pausado, encerrado).                 ║  → LogDeEventos                     ║
+║     pausado, encerrado).                 ║                                     ║
 ║  2. Conhecer a topologia de rede         ║                                     ║
 ║     carregada para execução.             ║                                     ║
-║  3. Conhecer a velocidade e o passo      ║                                     ║
-║     de tempo configurados.               ║                                     ║
+║  3. Conhecer o instante de tempo         ║                                     ║
+║     global atual da simulação.           ║                                     ║
 ║                                          ║                                     ║
 ║  [Realização]                            ║                                     ║
 ║  4. Iniciar, pausar, retomar e           ║                                     ║
-║     encerrar o ciclo de simulação.       ║                                     ║
-║  5. Coordenar a progressão do tempo      ║                                     ║
-║     global de simulação.                 ║                                     ║
-║  6. Notificar observadores registrados   ║                                     ║
-║     sobre mudanças de estado e eventos   ║                                     ║
-║     críticos.                            ║                                     ║
-║  7. Delegar o processamento de cada      ║                                     ║
-║     passo de tempo ao Escalonador.       ║                                     ║
-║  8. Acionar a coleta de métricas ao      ║                                     ║
-║     final de cada intervalo configurado. ║                                     ║
+║     encerrar o ciclo de simulação        ║                                     ║
+║     via comandos de texto (CLI).         ║                                     ║
+║  5. Avançar a simulação um passo de      ║                                     ║
+║     tempo por vez (modo manual) ou       ║                                     ║
+║     em modo contínuo até encerrar.       ║                                     ║
+║  6. Delegar o processamento de cada      ║                                     ║
+║     passo de tempo ao                    ║                                     ║
+║     EscalonadorDeEventos.                ║                                     ║
+║  7. Exibir no terminal o estado e o      ║                                     ║
+║     instante de tempo a cada passo.      ║                                     ║
+║  8. Acionar a coleta e exibição de       ║                                     ║
+║     métricas ao final da simulação.      ║                                     ║
 ╚══════════════════════════════════════════╩═════════════════════════════════════╝
