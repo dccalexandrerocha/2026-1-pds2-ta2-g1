@@ -1,0 +1,27 @@
+PROJECT_NAME           = "Simulador de Rede e Telecomunicacao"
+PROJECT_NUMBER         = 1.0
+PROJECT_BRIEF          = "Simulador discreto de redes via terminal, em C++"
+
+OUTPUT_DIRECTORY       = docs/doxygen
+CREATE_SUBDIRS         = NO
+
+INPUT                  = include/
+FILE_PATTERNS          = *.hpp
+RECURSIVE              = NO
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+
+QUIET                  = YES
+WARNINGS               = YES
+
+JAVADOC_AUTOBRIEF      = YES
+TAB_SIZE               = 4
+
+SHOW_INCLUDE_FILES     = YES
+SORT_MEMBER_DOCS       = NO
