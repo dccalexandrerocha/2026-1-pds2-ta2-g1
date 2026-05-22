@@ -6,6 +6,7 @@
 - Gabriel Figueiredo
 - Lucas Alves
 - Saul Gonzalez
+- Fernanda Costa Berger
 
 ---
 
