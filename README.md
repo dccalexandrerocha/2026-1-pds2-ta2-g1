@@ -28,19 +28,77 @@ a STL do C++, sem dependências externas.
 
 ---
 
+## Pré-requisitos
+
+- `g++` com suporte a **C++17**
+- `make`
+- `gcovr` (para relatório de cobertura):
+  ```
+  pip install gcovr
+  ```
+
+> O arquivo `tests/doctest.h` já está incluído no repositório — não é preciso instalar nada além do acima.
+
+---
+
 ## Como compilar e executar
 
-**Pré-requisitos:**
-
- g++ com suporte a C++17 e Make.
-
-```bash
-# Compilar
+```
+# Compilar o simulador
 make
 
 # Executar
 ./simulador
 ```
+
+---
+
+## Testes de unidade e cobertura (C7/C8)
+
+O projeto usa o framework [doctest](https://github.com/doctest/doctest) para testes de unidade e [gcovr](https://gcovr.com/) para medir a cobertura.
+
+### Executar os testes
+
+```
+make test
+```
+
+O comando acima:
+1. Compila o runner de testes com flags de cobertura (`--coverage`).
+2. Executa todos os testes e exibe o resultado no terminal.
+3. Gera o relatório de cobertura em `coverage/index.html` (HTML navegável) e `coverage/coverage.xml`.
+
+### Resultado esperado
+
+```
+[doctest] test cases:  60 |  60 passed | 0 failed | 0 skipped
+[doctest] assertions: 112 | 112 passed | 0 failed |
+
+lines:     68.4% (398 out of 582)
+functions: 90.8%  (69 out of  76)
+```
+
+### Classes testadas
+
+| Suite de testes        | Arquivo testado              | Casos |
+|------------------------|------------------------------|-------|
+| `No`                   | `src/No.cpp`                 |   9   |
+| `Enlace`               | `src/Enlace.cpp`             |   6   |
+| `ColetorDeMetricas`    | `src/ColetorDeMetricas.cpp`  |   7   |
+| `EscalonadorDeEventos` | `src/EscalonadorDeEventos.cpp`|  7   |
+| `TopologiaDeRede`      | `src/TopologiaDeRede.cpp`    |  13   |
+| `RoteamentoDijkstra`   | `src/ProtocoloDeRoteamento.cpp`| 6  |
+| `Simulador`            | `src/Simulador.cpp`          |  12   |
+
+---
+
+## Limpar arquivos gerados
+
+```
+make clean
+```
+
+Remove o binário do simulador, o runner de testes, os arquivos `.gcda`/`.gcno` e a pasta `coverage/`.
 
 ---
 
@@ -149,19 +207,21 @@ Pacotes perdidos:   1
 
 ## Referência de comandos
 
-| Comando                                      | Quando usar             | Descrição                                     |
-|----------------------------------------------|-------------------------|-----------------------------------------------|
-| `add_no <tipo> <id>`                         | Antes de `iniciar`      | Adiciona um nó. Tipos: host, roteador, switch |
-| `add_enlace <id> <noA> <noB> latencia=<ms>`  | Antes de `iniciar`      | Conecta dois nós com um enlace                |
-| `iniciar`                                    | Após montar a topologia | Valida a rede e inicia a simulação            |
-| `proximo`                                    | Durante a simulação     | Avança um passo de tempo                      |
-| `injetar <origem> <destino>`                 | Durante a simulação     | Injeta um pacote entre dois nós               |
-| `falha <idEnlace>`                           | Durante a simulação     | Marca um enlace como falho                    |
-| `recuperar <idEnlace>`                       | Durante a simulação     | Restaura um enlace falho                      |
-| `metricas`                                   | Qualquer momento        | Exibe métricas no terminal                    |
-| `exportar <arquivo.csv>`                     | Qualquer momento        | Exporta métricas para um arquivo CSV          |
-| `encerrar`                                   | Qualquer momento        | Encerra a simulação                           |
-| `ajuda`                                      | Qualquer momento        | Lista os comandos disponíveis                 |
+| Comando                                     | Quando usar             | Descrição                                     |
+| ------------------------------------------- | ----------------------- | --------------------------------------------- |
+| `add_no <tipo> <id>`                        | Antes de `iniciar`      | Adiciona um nó. Tipos: host, roteador, switch |
+| `add_enlace <id> <noA> <noB> latencia=<ms>` | Antes de `iniciar`      | Conecta dois nós com um enlace                |
+| `iniciar`                                   | Após montar a topologia | Valida a rede e inicia a simulação            |
+| `pausar`                                    | Durante a simulação     | Pausa a simulação                             |
+| `retomar`                                   | Após pausar             | Retoma a simulação pausada                    |
+| `proximo`                                   | Durante a simulação     | Avança um passo de tempo                      |
+| `injetar <origem> <destino>`                | Durante a simulação     | Injeta um pacote entre dois nós               |
+| `falha <idEnlace>`                          | Durante a simulação     | Marca um enlace como falho                    |
+| `recuperar <idEnlace>`                      | Durante a simulação     | Restaura um enlace falho                      |
+| `metricas`                                  | Qualquer momento        | Exibe métricas no terminal                    |
+| `exportar <arquivo.csv>`                    | Qualquer momento        | Exporta métricas para um arquivo CSV          |
+| `encerrar`                                  | Qualquer momento        | Encerra a simulação                           |
+| `ajuda`                                     | Qualquer momento        | Lista os comandos disponíveis                 |
 
 ---
 
@@ -169,18 +229,31 @@ Pacotes perdidos:   1
 
 ```
 simulador-rede/
-├── include/          # Cabeçalhos (.hpp)
-│   ├── No.hpp                    # Classe base No e subclasses Host, Roteador, Switch
-│   ├── Enlace.hpp                # Conexão entre dois nós
-│   ├── TopologiaDeRede.hpp       # Grafo da rede
-│   ├── ProtocoloDeRoteamento.hpp # Classe base abstrata + RoteamentoDijkstra
-│   ├── EscalonadorDeEventos.hpp  # Fila de eventos ordenada por tempo
-│   ├── ColetorDeMetricas.hpp     # Coleta e exporta métricas
-│   └── Simulador.hpp             # Loop principal e leitura de comandos
-├── src/              # Implementações (.cpp)
-├── docs/doxygen/     # Documentação gerada pelo Doxygen
-├── Doxyfile          # Configuração do Doxygen
-├── Makefile
+├── include/               # Cabeçalhos (.hpp)
+│   ├── No.hpp                     # Classe base No e subclasses Host, Roteador, Switch
+│   ├── Enlace.hpp                 # Conexão entre dois nós
+│   ├── TopologiaDeRede.hpp        # Grafo da rede
+│   ├── ProtocoloDeRoteamento.hpp  # Classe base abstrata + RoteamentoDijkstra
+│   ├── EscalonadorDeEventos.hpp   # Fila de eventos ordenada por tempo
+│   ├── ColetorDeMetricas.hpp      # Coleta e exporta métricas
+│   └── Simulador.hpp              # Loop principal e leitura de comandos
+├── src/                   # Implementações (.cpp)
+│   ├── No.cpp
+│   ├── Enlace.cpp
+│   ├── TopologiaDeRede.cpp
+│   ├── ProtocoloDeRoteamento.cpp
+│   ├── EscalonadorDeEventos.cpp
+│   ├── ColetorDeMetricas.cpp
+│   ├── Simulador.cpp
+│   └── main.cpp
+├── tests/                 # Testes de unidade (doctest)
+│   ├── doctest.h          # Framework doctest (single-header, sem instalacao)
+│   └── testes.cpp         # Suites de testes para todas as classes
+├── build/                 # Binarios e arquivos de cobertura (.gcda/.gcno)
+├── coverage/              # Relatorios HTML/XML de cobertura (gerados por make test)
+├── design/                # Diagramas e documentos de design
+├── Doxyfile               # Configuração do Doxygen
+├── Makefile               # Automação: make / make test / make clean
 └── README.md
 ```
 
@@ -190,7 +263,7 @@ simulador-rede/
 
 Com o [Doxygen](https://www.doxygen.nl/) instalado:
 
-```bash
+```
 doxygen Doxyfile
 ```
 
@@ -203,5 +276,7 @@ documentação de todas as classes e métodos.
 
 - **Linguagem:** C++17
 - **Bibliotecas:** STL apenas (sem dependências externas)
+- **Testes:** [doctest](https://github.com/doctest/doctest) (single-header)
+- **Cobertura:** [gcovr](https://gcovr.com/)
 - **Documentação:** Doxygen
 - **Build:** Make
