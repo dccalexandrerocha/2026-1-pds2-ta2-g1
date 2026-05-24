@@ -1,0 +1,4 @@
+ - boa cobertura
+ - ótima quantidade de casos de teste
+ - aparentemente apenas 1 aluno está implementando tudo. desse jeito só ele vai ficar com nota...
+ - apenas 1 commit para a entrega inteira com mais de 400 linhas? isso não é aceitável. commits são incrementos pequenos de código com um objetivo simples. daqui para frente espero commits individuais de cada etapa de implementação. exemplo: "Corrigido/implementado o caso de teste XX", "Criada uma nova classe YYY.", "Bug referente ao teste XX da classe YYY corrigido."
