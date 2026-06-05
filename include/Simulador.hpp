@@ -8,6 +8,7 @@
 #include "EscalonadorDeEventos.hpp"
 #include "ColetorDeMetricas.hpp"
 #include "ProtocoloDeRoteamento.hpp"
+#include "Excecoes.hpp"
 
 /**
  * @brief Estados possiveis do ciclo de vida da simulacao.

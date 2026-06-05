@@ -7,6 +7,7 @@
 
 #include "No.hpp"
 #include "Enlace.hpp"
+#include "Excecoes.hpp"
 
 /**
  * @brief Armazena e gerencia o grafo completo da rede simulada.
