@@ -1,4 +1,5 @@
 #include "ColetorDeMetricas.hpp"
+#include "Excecoes.hpp"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -62,34 +63,72 @@ void ColetorDeMetricas::exibirResumo() const {
 }
 
 bool ColetorDeMetricas::exportarCSV(const std::string& caminho) const {
-    std::ofstream arquivo(caminho);
-    if (!arquivo.is_open()) return false;
+    try {
+        if (caminho.empty()) {
+            throw ExcecaoArquivo("Caminho do arquivo não pode estar vazio");
+        }
 
-    arquivo << "tipo,id,transmitidos,descartados,util_media,util_max\n";
-    for (const auto& par : enlaces_) {
-        const DadosEnlace& d = par.second;
-        double media = (d.numRegistros > 0)
-                       ? (d.utilizacaoSoma / d.numRegistros)
-                       : 0.0;
-        arquivo << "enlace,"
-                << par.first      << ","
-                << d.transmitidos << ","
-                << d.descartados  << ","
-                << media          << ","
-                << d.utilizacaoMax<< "\n";
+        std::ofstream arquivo(caminho);
+        
+        // Validação defensiva: verificar se arquivo foi aberto
+        if (!arquivo.is_open()) {
+            throw ExcecaoArquivo("Não foi possível abrir arquivo '" + caminho + 
+                               "' para escrita (verifique permissões)");
+        }
+
+        // Verificar se a escrita foi bem-sucedida
+        arquivo << "tipo,id,transmitidos,descartados,util_media,util_max\n";
+        if (!arquivo.good()) {
+            throw ExcecaoArquivo("Erro ao escrever cabeçalho no arquivo");
+        }
+
+        for (const auto& par : enlaces_) {
+            const DadosEnlace& d = par.second;
+            double media = (d.numRegistros > 0)
+                           ? (d.utilizacaoSoma / d.numRegistros)
+                           : 0.0;
+            arquivo << "enlace,"
+                    << par.first      << ","
+                    << d.transmitidos << ","
+                    << d.descartados  << ","
+                    << media          << ","
+                    << d.utilizacaoMax<< "\n";
+            
+            if (!arquivo.good()) {
+                throw ExcecaoArquivo("Erro ao escrever dados de enlace no arquivo");
+            }
+        }
+
+        arquivo << "tipo,id,recebidos,enviados,descartados,,\n";
+        if (!arquivo.good()) {
+            throw ExcecaoArquivo("Erro ao escrever cabeçalho de nós no arquivo");
+        }
+
+        for (const auto& par : nos_) {
+            const DadosNo& d = par.second;
+            arquivo << "no,"
+                    << par.first  << ","
+                    << d.recebidos<< ","
+                    << d.enviados << ","
+                    << d.descartados << ",,\n";
+            
+            if (!arquivo.good()) {
+                throw ExcecaoArquivo("Erro ao escrever dados de nó no arquivo");
+            }
+        }
+
+        arquivo.close();
+        if (!arquivo) {
+            throw ExcecaoArquivo("Erro ao fechar arquivo de saída");
+        }
+
+        return true;
+
+    } catch (const ExcecaoArquivo&) {
+        throw;  // Re-lança para o chamador
+    } catch (const std::exception& e) {
+        throw ExcecaoArquivo(std::string("Exceção ao exportar CSV: ") + e.what());
     }
-
-    arquivo << "tipo,id,recebidos,enviados,descartados,,\n";
-    for (const auto& par : nos_) {
-        const DadosNo& d = par.second;
-        arquivo << "no,"
-                << par.first  << ","
-                << d.recebidos<< ","
-                << d.enviados << ","
-                << d.descartados << ",,\n";
-    }
-
-    return true;
 }
 
 int ColetorDeMetricas::getTotalEntregues() const {
