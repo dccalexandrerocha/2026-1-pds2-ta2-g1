@@ -2,6 +2,7 @@
 #include "TopologiaDeRede.hpp"
 #include "Enlace.hpp"
 #include "No.hpp"
+#include "Excecoes.hpp"
 #include <iostream>
 #include <queue>
 #include <limits>
@@ -14,71 +15,154 @@ std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
     const std::string& origem,
     const std::string& destino)
 {
-    // Garante que os nos existem
-    if (!topologia.getNo(origem) || !topologia.getNo(destino)) {
-        return {};
-    }
+    try {
+        // Validações defensivas
+        if (origem.empty() || destino.empty()) {
+            throw ExcecaoRede("Origem ou destino vazio em calcularCaminho()");
+        }
 
-    // dist: menor custo acumulado ate cada no
-    std::unordered_map<std::string, double> dist;
-    // anterior: de onde viemos para chegar em cada no
-    std::unordered_map<std::string, std::string> anterior;
+        if (origem == destino) {
+            throw ExcecaoRede("Origem não pode ser igual ao destino");
+        }
 
-    for (No* no : topologia.getNos()) {
-        dist[no->getId()] = std::numeric_limits<double>::infinity();
-    }
-    dist[origem] = 0.0;
+        // Garante que os nós existem
+        No* noOrigem = topologia.getNo(origem);
+        No* noDestino = topologia.getNo(destino);
+        
+        if (!noOrigem) {
+            throw ExcecaoRede("Nó de origem '" + origem + "' não existe");
+        }
+        if (!noDestino) {
+            throw ExcecaoRede("Nó de destino '" + destino + "' não existe");
+        }
 
-    // Fila de prioridade: (custo, id)
-    using Par = std::pair<double, std::string>;
-    std::priority_queue<Par, std::vector<Par>, std::greater<Par>> pq;
-    pq.push({0.0, origem});
+        std::vector<No*> nos = topologia.getNos();
+        if (nos.empty()) {
+            throw ExcecaoRede("Topologia vazia (sem nós)");
+        }
 
-    while (!pq.empty()) {
-        auto [custoAtual, atual] = pq.top();
-        pq.pop();
+        // dist: menor custo acumulado até cada nó
+        std::unordered_map<std::string, double> dist;
+        // anterior: de onde viemos para chegar em cada nó
+        std::unordered_map<std::string, std::string> anterior;
 
-        if (custoAtual > dist[atual]) continue;  // entrada obsoleta
-        if (atual == destino) break;
+        for (No* no : nos) {
+            if (!no) {
+                std::cout << "[AVISO] Nó nulo encontrado em calcularCaminho()\n";
+                continue;
+            }
+            dist[no->getId()] = std::numeric_limits<double>::infinity();
+        }
+        dist[origem] = 0.0;
 
-        for (Enlace* e : topologia.getVizinhos(atual)) {
-            if (!e->isAtivo()) continue;
+        // Fila de prioridade: (custo, id)
+        using Par = std::pair<double, std::string>;
+        std::priority_queue<Par, std::vector<Par>, std::greater<Par>> pq;
+        pq.push({0.0, origem});
 
-            // Determina o vizinho do lado oposto
-            std::string vizinho;
-            if (e->getNoA()->getId() == atual) {
-                vizinho = e->getNoB()->getId();
-            } else {
-                vizinho = e->getNoA()->getId();
+        while (!pq.empty()) {
+            auto [custoAtual, atual] = pq.top();
+            pq.pop();
+
+            // Validação: nó não deve estar no mapa de distâncias
+            if (dist.find(atual) == dist.end()) {
+                continue;  // Nó foi deletado ou é inválido
             }
 
-            double novoCusto = dist[atual] + e->getLatencia();
-            if (novoCusto < dist[vizinho]) {
-                dist[vizinho] = novoCusto;
-                anterior[vizinho] = atual;
-                pq.push({novoCusto, vizinho});
+            if (custoAtual > dist[atual]) continue;  // entrada obsoleta
+            if (atual == destino) break;
+
+            std::vector<Enlace*> vizinhos = topologia.getVizinhos(atual);
+            for (Enlace* e : vizinhos) {
+                // Validação defensiva: enlace nulo
+                if (!e) {
+                    std::cout << "[AVISO] Enlace nulo em calcularCaminho()\n";
+                    continue;
+                }
+
+                if (!e->isAtivo()) continue;
+
+                // Validação defensiva: nós nulos
+                No* noA = e->getNoA();
+                No* noB = e->getNoB();
+                if (!noA || !noB) {
+                    std::cout << "[AVISO] Enlace com nó nulo em calcularCaminho()\n";
+                    continue;
+                }
+
+                // Validação: latência não negativa
+                double latencia = e->getLatencia();
+                if (latencia < 0.0) {
+                    std::cout << "[AVISO] Enlace com latência negativa\n";
+                    continue;
+                }
+
+                std::string vizinho;
+                if (noA->getId() == atual) {
+                    vizinho = noB->getId();
+                } else {
+                    vizinho = noA->getId();
+                }
+
+                // Verificar se vizinho está em dist
+                if (dist.find(vizinho) == dist.end()) {
+                    continue;  // Nó vizinho não existe
+                }
+
+                double novoCusto = dist[atual] + latencia;
+                if (novoCusto < dist[vizinho]) {
+                    dist[vizinho] = novoCusto;
+                    anterior[vizinho] = atual;
+                    pq.push({novoCusto, vizinho});
+                }
             }
         }
+
+        // Reconstrói o caminho do destino até a origem
+        if (dist[destino] == std::numeric_limits<double>::infinity()) {
+            return {};   // sem caminho
+        }
+
+        std::vector<std::string> caminho;
+        std::string atual = destino;
+        
+        // Proteção contra loop infinito
+        int tentativas = 0;
+        const int maxTentativas = nos.size() + 10;
+        
+        while (atual != origem && tentativas < maxTentativas) {
+            caminho.push_back(atual);
+            
+            if (anterior.find(atual) == anterior.end()) {
+                // Caminho quebrado - não deveria acontecer
+                throw ExcecaoRede("Caminho quebrado durante reconstrução");
+            }
+            
+            atual = anterior[atual];
+            tentativas++;
+        }
+
+        if (tentativas >= maxTentativas) {
+            throw ExcecaoRede("Loop infinito detectado ao reconstruir caminho");
+        }
+
+        caminho.push_back(origem);
+        std::reverse(caminho.begin(), caminho.end());
+
+        // Armazena na tabela interna
+        if (caminho.size() > 1) {
+            tabelas_[origem][destino] = caminho[1];
+        }
+
+        return caminho;
+
+    } catch (const ExcecaoRede& e) {
+        std::cout << "[AVISO] " << e.what() << "\n";
+        return {};
+    } catch (const std::exception& e) {
+        std::cout << "[AVISO] Exceção em Dijkstra: " << e.what() << "\n";
+        return {};
     }
-
-    // Reconstroi o caminho do destino ate a origem
-    if (dist[destino] == std::numeric_limits<double>::infinity()) {
-        return {};   // sem caminho
-    }
-
-    std::vector<std::string> caminho;
-    std::string atual = destino;
-    while (atual != origem) {
-        caminho.push_back(atual);
-        atual = anterior[atual];
-    }
-    caminho.push_back(origem);
-    std::reverse(caminho.begin(), caminho.end());
-
-    // Armazena na tabela interna
-    tabelas_[origem][destino] = caminho.size() > 1 ? caminho[1] : destino;
-
-    return caminho;
 }
 
 void RoteamentoDijkstra::exibirTabela(const std::string& idNo) const {

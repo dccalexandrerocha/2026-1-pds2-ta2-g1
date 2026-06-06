@@ -1,6 +1,7 @@
 #include "Enlace.hpp"
 #include "No.hpp"
 #include "ColetorDeMetricas.hpp"
+#include "Excecoes.hpp"
 #include <iostream>
 
 Enlace::Enlace(const std::string& id,
@@ -35,45 +36,81 @@ bool Enlace::transmitir(const std::string& origem,
                         const std::string& destino,
                         int tempo)
 {
-    numPassos_++;
+    try {
+        numPassos_++;
 
-    if (!ativo_) {
-        pacotesDescartados_++;
-        std::cout << "[t=" << tempo << "] Enlace " << id_
-                  << " esta falho. Pacote " << origem
-                  << " -> " << destino << " descartado.\n";
-        return false;
-    }
+        // Validação defensiva: origem e destino não vazios
+        if (origem.empty() || destino.empty()) {
+            throw ExcecaoRede("Origem ou destino vazio em transmissão");
+        }
 
-    // Determina o no de destino deste salto
-    No* noDestino = nullptr;
-    if (noA_ && noA_->getId() == destino) {
-        noDestino = noA_;
-    } else if (noB_ && noB_->getId() == destino) {
-        noDestino = noB_;
-    } else {
-        // destino nao e extremidade direta: entrega ao no oposto ao de origem
-        if (noA_ && noA_->getId() == origem) {
+        if (!ativo_) {
+            pacotesDescartados_++;
+            std::cout << "[t=" << tempo << "] Enlace " << id_
+                      << " está falho. Pacote " << origem
+                      << " -> " << destino << " descartado.\n";
+            return false;
+        }
+
+        // Validação defensiva: ponteiros não nulos
+        if (!noA_ || !noB_) {
+            throw ExcecaoMemoria("Enlace " + id_ + " tem nó nulo");
+        }
+
+        // Determina o nó de destino deste salto
+        No* noDestino = nullptr;
+        if (noA_->getId() == destino) {
+            noDestino = noA_;
+        } else if (noB_->getId() == destino) {
             noDestino = noB_;
         } else {
-            noDestino = noA_;
+            // destino não é extremidade direta: entrega ao nó oposto ao de origem
+            if (noA_->getId() == origem) {
+                noDestino = noB_;
+            } else {
+                noDestino = noA_;
+            }
         }
-    }
 
-    pacotesTransmitidos_++;
-    // Simples: 1 pacote por passo usa 1/banda da capacidade
-    double utilizacao = (banda_ > 0.0) ? (1.0 / banda_) : 0.0;
-    utilizacaoAcumulada_ += utilizacao;
+        // Validação defensiva: noDestino não deve ser nulo
+        if (!noDestino) {
+            throw ExcecaoMemoria("Nó de destino calculado como nulo no enlace " + id_);
+        }
 
-    std::cout << "[t=" << tempo << "] " << origem
-              << " -> " << destino
-              << " (" << id_ << ", latencia=" << latencia_ << "ms) OK\n";
+        pacotesTransmitidos_++;
+        
+        // Validação defensiva: evitar divisão por zero
+        double utilizacao = 0.0;
+        if (banda_ > 0.0) {
+            utilizacao = 1.0 / banda_;
+        } else {
+            std::cout << "[AVISO] Enlace " << id_ << " tem banda <= 0. Utilizando 0%.\n";
+        }
+        
+        utilizacaoAcumulada_ += utilizacao;
 
-    if (noDestino) {
+        std::cout << "[t=" << tempo << "] " << origem
+                  << " -> " << destino
+                  << " (" << id_ << ", latência=" << latencia_ << "ms) OK\n";
+
+        // Chamada segura ao método virtual
         noDestino->receberPacote(origem, destino, tempo);
-    }
 
-    return true;
+        return true;
+
+    } catch (const ExcecaoMemoria& e) {
+        std::cout << "[ERRO] " << e.what() << "\n";
+        pacotesDescartados_++;
+        return false;
+    } catch (const ExcecaoRede& e) {
+        std::cout << "[ERRO] " << e.what() << "\n";
+        pacotesDescartados_++;
+        return false;
+    } catch (const std::exception& e) {
+        std::cout << "[ERRO] Exceção em transmissão: " << e.what() << "\n";
+        pacotesDescartados_++;
+        return false;
+    }
 }
 
 int    Enlace::getPacotesTransmitidos() const { return pacotesTransmitidos_; }

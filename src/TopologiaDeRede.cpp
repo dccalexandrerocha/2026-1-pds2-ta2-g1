@@ -94,9 +94,13 @@ std::vector<Enlace*> TopologiaDeRede::getVizinhos(const std::string& idNo) const
 }
 
 bool TopologiaDeRede::validarConectividade() const {
-    if (nos_.empty()) return true;
+    // Validação defensiva: topologia vazia é válida (pode estar sendo construída)
+    if (nos_.empty()) {
+        std::cout << "[AVISO] Topologia vazia.\n";
+        return true;
+    }
 
-    // BFS a partir do primeiro no
+    // BFS a partir do primeiro nó
     std::unordered_set<std::string> visitados;
     std::queue<std::string> fila;
 
@@ -109,13 +113,29 @@ bool TopologiaDeRede::validarConectividade() const {
         fila.pop();
 
         for (Enlace* e : getVizinhos(atual)) {
-            if (!e->isAtivo()) continue;
-            std::string vizinho;
-            if (e->getNoA()->getId() == atual) {
-                vizinho = e->getNoB()->getId();
-            } else {
-                vizinho = e->getNoA()->getId();
+            // Validação defensiva: enlace nulo
+            if (!e) {
+                std::cout << "[AVISO] Enlace nulo encontrado em validarConectividade()\n";
+                continue;
             }
+            
+            if (!e->isAtivo()) continue;
+
+            // Validação defensiva: nó nulo
+            No* noA = e->getNoA();
+            No* noB = e->getNoB();
+            if (!noA || !noB) {
+                std::cout << "[AVISO] Enlace com nó nulo encontrado\n";
+                continue;
+            }
+
+            std::string vizinho;
+            if (noA->getId() == atual) {
+                vizinho = noB->getId();
+            } else {
+                vizinho = noA->getId();
+            }
+
             if (!visitados.count(vizinho)) {
                 visitados.insert(vizinho);
                 fila.push(vizinho);
@@ -126,7 +146,7 @@ bool TopologiaDeRede::validarConectividade() const {
     bool conectado = true;
     for (const auto& par : nos_) {
         if (!visitados.count(par.first)) {
-            std::cout << "[AVISO] No isolado: " << par.first << "\n";
+            std::cout << "[AVISO] Nó isolado: " << par.first << "\n";
             conectado = false;
         }
     }
