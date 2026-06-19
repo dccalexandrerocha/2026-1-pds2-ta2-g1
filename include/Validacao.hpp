@@ -131,11 +131,11 @@ inline int parseInt(const std::string& str) {
  */
 inline std::string extrairValor(const std::string& str, const std::string& chave) {
     const std::string prefixo = chave + "=";
-    size_t pos = str.find(prefixo);
-    if (pos == std::string::npos) {
-        throw ExcecaoEntrada("esperado formato '" + chave + "=<valor>'");
-    }
-    std::string valor = str.substr(pos + prefixo.length());
+    if (str.rfind(prefixo, 0) != 0) {
+    throw ExcecaoEntrada("esperado formato '" + chave + "=<valor>'");
+}
+
+std::string valor = str.substr(prefixo.length());
     if (valor.empty()) {
         throw ExcecaoEntrada(chave + " não pode estar vazio");
     }
