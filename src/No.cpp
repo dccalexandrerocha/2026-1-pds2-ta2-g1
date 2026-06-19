@@ -1,5 +1,6 @@
 #include "No.hpp"
 #include "Enlace.hpp"
+#include "Validacao.hpp"
 #include <iostream>
 
 // ── No (base) ────────────────────────────────────────────────────────────────
@@ -20,6 +21,7 @@ const std::string& No::getEndereco() const { return endereco_; }
 bool               No::isAtivo()     const { return ativo_; }
 
 void No::adicionarEnlace(Enlace* enlace) {
+    Validacao::validarNaoNulo(enlace, "enlace");
     enlaces_.push_back(enlace);
 }
 
