@@ -1,5 +1,6 @@
 #include "ColetorDeMetricas.hpp"
 #include "Excecoes.hpp"
+#include "Validacao.hpp"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -9,11 +10,17 @@ void ColetorDeMetricas::registrarEnlace(const std::string& idEnlace,
                                         int descartados,
                                         double utilizacao)
 {
+    Validacao::validarNaoVazio(idEnlace, "id do enlace");
+    Validacao::validarIntervalo(transmitidos, 0.0, 1.0e9, "pacotes transmitidos");
+    Validacao::validarIntervalo(descartados, 0.0, 1.0e9, "pacotes descartados");
+    Validacao::validarIntervalo(utilizacao, 0.0, 1.0, "utilizacao do enlace");
+
     DadosEnlace& d = enlaces_[idEnlace];
-    d.transmitidos   += transmitidos;
-    d.descartados    += descartados;
+    d.transmitidos += transmitidos;
+    d.descartados += descartados;
     d.utilizacaoSoma += utilizacao;
     d.numRegistros++;
+
     if (utilizacao > d.utilizacaoMax) {
         d.utilizacaoMax = utilizacao;
     }
