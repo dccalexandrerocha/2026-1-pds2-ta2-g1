@@ -7,15 +7,22 @@
 #include <vector>
 
 // ── Helpers locais ────────────────────────────────────────────────────────────
-
 static std::vector<std::string> tokenizar(const std::string& linha) {
-    std::istringstream ss(linha);
     std::vector<std::string> tokens;
+
+    if (linha.empty()) {
+        return tokens;
+    }
+
+    std::istringstream ss(linha);
     std::string tok;
-    while (ss >> tok) tokens.push_back(tok);
+
+    while (ss >> tok) {
+        tokens.push_back(tok);
+    }
+
     return tokens;
 }
-
 // ── Construtor ────────────────────────────────────────────────────────────────
 
 Simulador::Simulador()
