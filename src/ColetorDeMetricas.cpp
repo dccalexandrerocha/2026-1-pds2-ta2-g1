@@ -158,6 +158,10 @@ int ColetorDeMetricas::getTotalPerdidos() const {
 }
 
 void ColetorDeMetricas::reset() {
+    if (enlaces_.empty() && nos_.empty()) {
+        return;
+    }
+
     enlaces_.clear();
     nos_.clear();
 }
