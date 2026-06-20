@@ -166,11 +166,17 @@ std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
 }
 
 void RoteamentoDijkstra::exibirTabela(const std::string& idNo) const {
+    if (idNo.empty()) {
+        std::cout << "[AVISO] ID do no vazio ao exibir tabela de roteamento.\n";
+        return;
+    }
+
     auto it = tabelas_.find(idNo);
     if (it == tabelas_.end()) {
         std::cout << "Tabela de roteamento de " << idNo << ": (vazia)\n";
         return;
     }
+
     std::cout << "Tabela de roteamento de " << idNo << ":\n";
     for (const auto& par : it->second) {
         std::cout << "  destino: " << par.first
