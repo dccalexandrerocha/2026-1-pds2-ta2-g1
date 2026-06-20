@@ -57,8 +57,14 @@ bool TopologiaDeRede::adicionarEnlace(std::unique_ptr<Enlace> enlace) {
 }
 
 bool TopologiaDeRede::removerEnlace(const std::string& id) {
-    if (!enlaces_.count(id)) return false;
-    enlaces_.erase(id);
+    if (id.empty()) return false;
+
+    auto it = enlaces_.find(id);
+    if (it == enlaces_.end()) {
+        return false;
+    }
+
+    enlaces_.erase(it);
     return true;
 }
 
