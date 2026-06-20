@@ -6,8 +6,11 @@
 
 bool TopologiaDeRede::adicionarNo(std::unique_ptr<No> no) {
     if (!no) return false;
+
     const std::string id = no->getId();
+    if (id.empty()) return false;
     if (nos_.count(id)) return false;   // ID ja existe
+
     nos_[id] = std::move(no);
     return true;
 }
