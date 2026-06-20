@@ -2,6 +2,7 @@
 #include "No.hpp"
 #include "ColetorDeMetricas.hpp"
 #include "Excecoes.hpp"
+#include "Validacao.hpp"
 #include <iostream>
 
 Enlace::Enlace(const std::string& id,
@@ -19,7 +20,13 @@ Enlace::Enlace(const std::string& id,
       pacotesDescartados_(0),
       utilizacaoAcumulada_(0.0),
       numPassos_(0)
-{}
+{
+    Validacao::validarNaoVazio(id_, "id do enlace");
+    Validacao::validarNaoNulo(noA_, "noA do enlace");
+    Validacao::validarNaoNulo(noB_, "noB do enlace");
+    Validacao::validarIntervalo(banda_, 0.000001, 1.0e12, "banda do enlace");
+    Validacao::validarIntervalo(latencia_, 0.0, 1.0e12, "latencia do enlace");
+}
 
 const std::string& Enlace::getId()       const { return id_; }
 No*                Enlace::getNoA()      const { return noA_; }
