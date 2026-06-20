@@ -9,10 +9,15 @@ void EscalonadorDeEventos::agendarEvento(int tempo,
                                          const std::string& descricao,
                                          std::function<void()> acao)
 {
+    if (tempo < tempoAtual_) {
+        std::cout << "[AVISO] Evento no passado ignorado: t=" << tempo << "\n";
+        return;
+    }
+
     Evento e;
-    e.tempo     = tempo;
+    e.tempo = tempo;
     e.descricao = descricao;
-    e.acao      = acao;
+    e.acao = acao;
     fila_.push(e);
 }
 
