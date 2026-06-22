@@ -1,0 +1,14 @@
+# Binarios e executaveis
+simulador
+simulador.exe
+build/
+
+# Cobertura de codigo
+coverage/
+
+# Arquivos temporarios
+*.gcda
+*.gcno
+erro.txt
+teste.csv
+*.exe
