@@ -22,7 +22,8 @@ std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
         }
 
         if (origem == destino) {
-            throw ExcecaoRede("Origem não pode ser igual ao destino");
+            // Caso trivial: origem e destino sao o mesmo no
+            return {origem};
         }
 
         // Garante que os nós existem
