@@ -122,4 +122,25 @@ avaliar o comportamento da rede no experimento realizado.
 
 ---
 
-*Total: 5 User Stories — Simulador de Rede e Telecomunicacao*
+## US06 — Visualização da Tabela de Roteamento
+
+**Sistema:** Simulador de Rede e Telecomunicacao
+
+**Descrição:**
+Como Usuário, quero consultar a tabela de roteamento de um nó específico para
+verificar quais são os próximos saltos calculados pelo algoritmo de Dijkstra
+para cada destino na rede.
+
+**Classes relacionadas:** `ProtocoloDeRoteamento`, `TopologiaDeRede`
+
+**Critérios de aceitação:**
+
+1. Permitir exibir a tabela de roteamento de um nó informado via comando de
+   texto no terminal.
+2. Mostrar, para cada destino conhecido, o próximo salto (next hop) calculado
+   pelo Dijkstra.
+3. Exibir mensagem informativa caso o nó não possua tabela calculada ainda.
+4. Atualizar a tabela automaticamente após qualquer alteração de estado de
+   enlace (falha ou recuperação).
+
+*Total: 6 User Stories — Simulador de Rede e Telecomunicacao*
