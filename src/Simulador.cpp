@@ -73,7 +73,7 @@ Simulador::Simulador()
 void Simulador::executar() {
     imprimirSeparador();
     std::cout << "  Simulador de Rede de Telecomunicacao\n";
-    std::cout << "  PDS2 TA2 2026/1 | Grupo 1\n";
+    std::cout << "  PDS2 TA2 2026/1 | Grupo 15\n";
     imprimirSeparador();
     std::cout << "  Digite 'ajuda' para ver os comandos disponiveis.\n";
     imprimirSeparador();
