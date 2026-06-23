@@ -4,9 +4,9 @@
 
 | Nome                    | Matrícula  |
 |-------------------------|------------|
-| Mateus Poelman Pinheiro | 2025019437 |
-| Gabriel Figueiredo      | 2025019461 |
-| Lucas Alves             | 2025019569 |
+| Mateus Poelman Pinheiro | 2025019461 |
+| Gabriel Figueiredo      | 2025019569 |
+| Lucas Alves             | 2025019437 |
 | Saul Gonzalez           | 2025065358 |
 
 ---
