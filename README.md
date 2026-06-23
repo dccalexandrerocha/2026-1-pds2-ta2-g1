@@ -2,10 +2,12 @@
 
 ## Integrantes
 
-- Mateus Poelman Pinheiro
-- Gabriel Figueiredo
-- Lucas Alves
-- Saul Gonzalez
+| Nome                    | Matrícula  |
+|-------------------------|------------|
+| Mateus Poelman Pinheiro | 2025019437 |
+| Gabriel Figueiredo      | 2025019461 |
+| Lucas Alves             | 2025019569 |
+| Saul Gonzalez           | 2025065358 |
 
 ---
 
@@ -32,7 +34,7 @@ a STL do C++, sem dependências externas.
 
 - `g++` com suporte a **C++17**
 - `make`
-- `gcovr` (para relatório de cobertura):
+- `gcovr` (apenas para o relatório de cobertura, gerado pelo `make test`):
   ```
   pip install gcovr
   ```
@@ -57,6 +59,21 @@ make
 
 O projeto usa o framework [doctest](https://github.com/doctest/doctest) para testes de unidade e [gcovr](https://gcovr.com/) para medir a cobertura.
 
+### ⚠️ IMPORTANTE: execute `make test` no Prompt de Comando (CMD)
+
+**O `make test` deve ser rodado no CMD do Windows, não no Git Bash, WSL ou PowerShell.**
+
+O Git Bash e o WSL alteram a forma como caminhos e variáveis de ambiente são
+resolvidos no Makefile, o que causa falhas na compilação do runner de testes
+e na execução do gcovr. Use sempre o **Prompt de Comando nativo (`cmd.exe`)**.
+
+Para abrir o CMD e navegar até o projeto:
+
+```
+cd caminho\para\o\projeto
+make test
+```
+
 ### Executar os testes
 
 ```
@@ -71,24 +88,23 @@ O comando acima:
 ### Resultado esperado
 
 ```
-[doctest] test cases:  60 |  60 passed | 0 failed | 0 skipped
-[doctest] assertions: 112 | 112 passed | 0 failed |
-
-lines:     68.4% (398 out of 582)
-functions: 90.8%  (69 out of  76)
+[doctest] test cases:  91 |  91 passed | 0 failed | 0 skipped
+[doctest] assertions: 150 | 150 passed | 0 failed |
+[doctest] Status: SUCCESS!
 ```
 
 ### Classes testadas
 
-| Suite de testes        | Arquivo testado              | Casos |
-|------------------------|------------------------------|-------|
-| `No`                   | `src/No.cpp`                 |   9   |
-| `Enlace`               | `src/Enlace.cpp`             |   6   |
-| `ColetorDeMetricas`    | `src/ColetorDeMetricas.cpp`  |   7   |
-| `EscalonadorDeEventos` | `src/EscalonadorDeEventos.cpp`|  7   |
-| `TopologiaDeRede`      | `src/TopologiaDeRede.cpp`    |  13   |
-| `RoteamentoDijkstra`   | `src/ProtocoloDeRoteamento.cpp`| 6  |
-| `Simulador`            | `src/Simulador.cpp`          |  12   |
+| Suite de testes        | Arquivo testado               | Casos |
+|------------------------|-------------------------------|-------|
+| `No`                   | `src/No.cpp`                  |   9   |
+| `Enlace`               | `src/Enlace.cpp`              |  10   |
+| `ColetorDeMetricas`    | `src/ColetorDeMetricas.cpp`   |  10   |
+| `EscalonadorDeEventos` | `src/EscalonadorDeEventos.cpp`|   9   |
+| `TopologiaDeRede`      | `src/TopologiaDeRede.cpp`     |  16   |
+| `RoteamentoDijkstra`   | `src/ProtocoloDeRoteamento.cpp`|  10  |
+| `Simulador`            | `src/Simulador.cpp`           |  18   |
+| `SimuladorComandos`    | `src/Simulador.cpp`           |   9   |
 
 ---
 
@@ -162,7 +178,7 @@ H1 ---[E1, 5ms]--- R1 ---[E2, 10ms]--- R2 ---[E3, 5ms]--- H2
 
 > proximo
 [t=3] R2 -> H2 (E3, latencia=5ms) OK
-[t=3] Pacote entregue em H2.
+[t=3] Pacote entregue em H2 (origem: H1).
 ```
 
 ### 4. Simular uma falha de enlace
@@ -175,10 +191,12 @@ H1 ---[E1, 5ms]--- R1 ---[E2, 10ms]--- R2 ---[E3, 5ms]--- H2
 > falha E2
 [t=3] Enlace E2 marcado como falho.
 [t=3] Recalculando rotas...
-[t=3] Nenhuma rota disponivel. Pacote descartado.
+
+> proximo
+[t=4] Enlace E2 esta falho. Pacote H1 -> H2 descartado.
 
 > recuperar E2
-[t=3] Enlace E2 restaurado.
+[t=4] Enlace E2 restaurado.
 ```
 
 ### 5. Ver métricas e encerrar
@@ -187,21 +205,28 @@ H1 ---[E1, 5ms]--- R1 ---[E2, 10ms]--- R2 ---[E3, 5ms]--- H2
 > metricas
 
 === Metricas por Enlace ===
-E1 | transmitidos: 2 | descartados: 0
-E2 | transmitidos: 2 | descartados: 1
-E3 | transmitidos: 2 | descartados: 0
+E1 | transmitidos: 2 | descartados: 0 | util.media: 0.01 | util.max: 0.01
+E2 | transmitidos: 1 | descartados: 1 | util.media: 0.01 | util.max: 0.01
+E3 | transmitidos: 1 | descartados: 0 | util.media: 0.01 | util.max: 0.01
 
 === Totais Globais ===
-Pacotes injetados:  2
-Pacotes entregues:  1
-Pacotes perdidos:   1
+Pacotes entregues: 1
+Pacotes perdidos:  1
 
 > exportar resultados.csv
 [OK] Metricas exportadas para resultados.csv
 
 > encerrar
-[t=3] Simulacao encerrada.
+[t=4] Simulacao encerrada.
 ```
+
+### 6. Easter egg: créditos do projeto
+
+```
+> autores
+```
+
+Exibe os integrantes do grupo com arte ASCII e abre um vídeo de agradecimento (`vid.mp4`) com o player padrão do sistema.
 
 ---
 
@@ -222,6 +247,7 @@ Pacotes perdidos:   1
 | `exportar <arquivo.csv>`                    | Qualquer momento        | Exporta métricas para um arquivo CSV          |
 | `encerrar`                                  | Qualquer momento        | Encerra a simulação                           |
 | `ajuda`                                     | Qualquer momento        | Lista os comandos disponíveis                 |
+| `autores`                                   | Qualquer momento        | Exibe os integrantes e abre o video           |
 
 ---
 
@@ -236,7 +262,9 @@ simulador-rede/
 │   ├── ProtocoloDeRoteamento.hpp  # Classe base abstrata + RoteamentoDijkstra
 │   ├── EscalonadorDeEventos.hpp   # Fila de eventos ordenada por tempo
 │   ├── ColetorDeMetricas.hpp      # Coleta e exporta métricas
-│   └── Simulador.hpp              # Loop principal e leitura de comandos
+│   ├── Simulador.hpp              # Loop principal e leitura de comandos
+│   ├── Excecoes.hpp               # Hierarquia de excecoes do simulador
+│   └── Validacao.hpp              # Utilitarios de validacao defensiva
 ├── src/                   # Implementações (.cpp)
 │   ├── No.cpp
 │   ├── Enlace.cpp
@@ -249,9 +277,18 @@ simulador-rede/
 ├── tests/                 # Testes de unidade (doctest)
 │   ├── doctest.h          # Framework doctest (single-header, sem instalacao)
 │   └── testes.cpp         # Suites de testes para todas as classes
+├── design/                # Diagramas CRC e documentos de design
+│   ├── crc_01_Simulador.txt
+│   ├── crc_02_TopologiaDeRede.txt
+│   ├── crc_03_No.txt
+│   ├── crc_04_Enlace.txt
+│   ├── crc_05_EscalonadorDeEventos.txt
+│   ├── crc_06_ProtocoloDeRoteamento.txt
+│   ├── crc_07_ColetorDeMetricas.txt
+│   └── user_stories_v2.md
 ├── build/                 # Binarios e arquivos de cobertura (.gcda/.gcno)
 ├── coverage/              # Relatorios HTML/XML de cobertura (gerados por make test)
-├── design/                # Diagramas e documentos de design
+├── vid.mp4                # Video de agradecimento (aberto pelo comando "autores")
 ├── Doxyfile               # Configuração do Doxygen
 ├── Makefile               # Automação: make / make test / make clean
 └── README.md
@@ -259,9 +296,11 @@ simulador-rede/
 
 ---
 
-## Gerar documentação
+## Gerar documentação (Doxygen)
 
-Com o [Doxygen](https://www.doxygen.nl/) instalado:
+Todos os arquivos `.hpp` e `.cpp` estão documentados com comentários Doxygen
+(`@file`, `@brief`, `@param`, `@return`, `@throws`). Para gerar a documentação
+navegável em HTML, com o [Doxygen](https://www.doxygen.nl/) instalado:
 
 ```
 doxygen Doxyfile
@@ -269,6 +308,24 @@ doxygen Doxyfile
 
 Abra `docs/doxygen/html/index.html` no navegador para navegar pela
 documentação de todas as classes e métodos.
+
+---
+
+## Arquitetura
+
+O simulador segue o padrão de eventos discretos. Os principais componentes são:
+
+| Classe                   | Responsabilidade                                                     |
+|--------------------------|----------------------------------------------------------------------|
+| `Simulador`              | REPL, ciclo de vida, orquestração geral                              |
+| `TopologiaDeRede`        | Grafo de nós e enlaces; validação de conectividade (BFS)             |
+| `No` / `Host` / `Roteador` / `Switch` | Hierarquia de nós; polimorfismo via `receberPacote()`   |
+| `Enlace`                 | Transmissão salto a salto; contadores de uso                         |
+| `EscalonadorDeEventos`   | Fila de prioridade de eventos por tempo; relógio global              |
+| `RoteamentoDijkstra`     | Cálculo de menor caminho por latência; tabela de próximo salto       |
+| `ColetorDeMetricas`      | Acúmulo e exportação (CSV) de métricas por enlace e por nó           |
+| `Excecoes`               | Hierarquia de exceções tipadas para erros de rede, entrada e arquivo |
+| `Validacao`              | Funções inline de validação defensiva reutilizadas em todo o projeto |
 
 ---
 
