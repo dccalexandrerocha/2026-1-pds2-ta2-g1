@@ -464,6 +464,9 @@ void Simulador::processarComando(const std::string& linha) {
         } else if (cmd == "encerrar") {
             encerrar();
 
+        } else if (cmd == "autores") {
+            exibirAutores();
+
         } else {
             throw ExcecaoEntrada("Comando desconhecido: '" + cmd +
                                "'. Digite 'ajuda' para ver os comandos");
@@ -525,4 +528,61 @@ void Simulador::exibirAjuda() const {
 
     imprimirSeparador();
     std::cout << "\n";
+}
+
+// ── Autores ───────────────────────────────────────────────────────────────────
+
+/**
+ * @brief Exibe os autores do projeto com arte ASCII e abre o video de agradecimento.
+ *
+ * Imprime uma tela de creditos com carinhas em ASCII art para cada
+ * integrante do grupo e tenta abrir o arquivo vid.mp4 localizado na
+ * raiz do projeto usando o player padrao do sistema operacional.
+ */
+void Simulador::exibirAutores() const {
+    imprimirSeparador(60);
+    std::cout << "  Simulador de Rede | PDS2 TA2 2026/1 | Grupo 1\n";
+    std::cout << "  Obrigado por usar nosso projeto!\n";
+    imprimirSeparador(60);
+    std::cout << "\n";
+
+    std::cout
+        << "   +----------+   Mateus Poelman Pinheiro\n"
+        << "   |  O    O  |   Matricula: 2025019437\n"
+        << "   |    --    |   \n"
+        << "   |  \\____/ |   \n"
+        << "   +----------+   \n"
+        << "\n"
+        << "   +----------+   Gabriel Figueiredo\n"
+        << "   |  ^    ^  |   Matricula: 2025019461\n"
+        << "   |    ..    |   \n"
+        << "   |  (____)  |    \n"
+        << "   +----------+   \n"
+        << "\n"
+        << "   +----------+   Lucas Alves\n"
+        << "   |  *    *  |   Matricula: 2025019569\n"
+        << "   |    ~~    |   \n"
+        << "   |  /----\\ |   \n"
+        << "   +----------+   \n"
+        << "\n"
+        << "   +----------+   Saul Gonzalez\n"
+        << "   |  @    @  |   Matricula: 2025065358\n"
+        << "   |    ==    |   \n"
+        << "   |  <____>  |   \n"
+        << "   +----------+   \n"
+        << "\n";
+
+    imprimirSeparador(60);
+    std::cout << "  Abrindo video de agradecimento...\n";
+    imprimirSeparador(60);
+    std::cout << "\n";
+
+    // Tenta abrir vid.mp4 na raiz do projeto com o player padrao do SO
+#ifdef _WIN32
+    std::system("start vid.mp4");
+#elif __APPLE__
+    std::system("open vid.mp4");
+#else
+    std::system("xdg-open vid.mp4 2>/dev/null || vlc vid.mp4 2>/dev/null || mpv vid.mp4 2>/dev/null");
+#endif
 }

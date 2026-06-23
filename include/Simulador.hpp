@@ -99,6 +99,9 @@ private:
     /// @brief Exibe os comandos disponiveis no terminal.
     void exibirAjuda() const;
 
+    /// @brief Exibe os autores do projeto com arte ASCII e abre o video de agradecimento.
+    void exibirAutores() const;
+
     /// @brief Coleta metricas de todos os nos e enlaces para o coletor.
     void coletarMetricas();
 
