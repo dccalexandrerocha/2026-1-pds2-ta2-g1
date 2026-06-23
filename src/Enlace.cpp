@@ -1,3 +1,14 @@
+/**
+ * @file Enlace.cpp
+ * @brief Implementacao da classe Enlace.
+ *
+ * Gerencia o estado fisico da conexao entre dois nos, acumula
+ * contadores de uso e executa a transmissao salto a salto de
+ * pacotes, incluindo tratamento de falhas.
+ *
+ * @author Grupo 1 - PDS2 TA2 2026/1
+ */
+
 #include "Enlace.hpp"
 #include "No.hpp"
 #include "ColetorDeMetricas.hpp"
@@ -5,6 +16,12 @@
 #include "Validacao.hpp"
 #include <iostream>
 
+/**
+ * @brief Constroi um Enlace validando todos os parametros.
+ *
+ * Usa o namespace Validacao para garantir que ID, nos e
+ * parametros numericos sejam validos antes de armazenar.
+ */
 Enlace::Enlace(const std::string& id,
                No* noA,
                No* noB,
@@ -35,10 +52,27 @@ double             Enlace::getBanda()    const { return banda_; }
 double             Enlace::getLatencia() const { return latencia_; }
 bool               Enlace::isAtivo()    const { return ativo_; }
 
+/**
+ * @brief Altera o estado ativo/falho do enlace.
+ *
+ * Quando definido como falso, o enlace passa a descartar
+ * todos os pacotes ate ser restaurado.
+ */
 void Enlace::setAtivo(bool ativo) {
     ativo_ = ativo;
 }
 
+/**
+ * @brief Realiza a transmissao de um pacote entre dois nos.
+ *
+ * Determina o no de destino deste salto (pode ser noA ou noB,
+ * dependendo de quem originou o pacote) e chama receberPacote()
+ * no no destino. Se o enlace estiver falho, incrementa o contador
+ * de descartados e retorna false sem chamar o no.
+ *
+ * A utilizacao e calculada como 1/banda por pacote transmitido,
+ * servindo como proxy da taxa de ocupacao do enlace.
+ */
 bool Enlace::transmitir(const std::string& origem,
                         const std::string& destino,
                         int tempo)
@@ -46,32 +80,30 @@ bool Enlace::transmitir(const std::string& origem,
     try {
         numPassos_++;
 
-        // Validação defensiva: origem e destino não vazios
         if (origem.empty() || destino.empty()) {
-            throw ExcecaoRede("Origem ou destino vazio em transmissão");
+            throw ExcecaoRede("Origem ou destino vazio em transmissao");
         }
 
         if (!ativo_) {
             pacotesDescartados_++;
             std::cout << "[t=" << tempo << "] Enlace " << id_
-                      << " está falho. Pacote " << origem
+                      << " esta falho. Pacote " << origem
                       << " -> " << destino << " descartado.\n";
             return false;
         }
 
-        // Validação defensiva: ponteiros não nulos
         if (!noA_ || !noB_) {
-            throw ExcecaoMemoria("Enlace " + id_ + " tem nó nulo");
+            throw ExcecaoMemoria("Enlace " + id_ + " tem no nulo");
         }
 
-        // Determina o nó de destino deste salto
+        // Determina o no de destino deste salto
         No* noDestino = nullptr;
         if (noA_->getId() == destino) {
             noDestino = noA_;
         } else if (noB_->getId() == destino) {
             noDestino = noB_;
         } else {
-            // destino não é extremidade direta: entrega ao nó oposto ao de origem
+            // destino nao e extremidade direta: entrega ao no oposto ao de origem
             if (noA_->getId() == origem) {
                 noDestino = noB_;
             } else {
@@ -79,28 +111,24 @@ bool Enlace::transmitir(const std::string& origem,
             }
         }
 
-        // Validação defensiva: noDestino não deve ser nulo
         if (!noDestino) {
-            throw ExcecaoMemoria("Nó de destino calculado como nulo no enlace " + id_);
+            throw ExcecaoMemoria("No de destino calculado como nulo no enlace " + id_);
         }
 
         pacotesTransmitidos_++;
-        
-        // Validação defensiva: evitar divisão por zero
+
         double utilizacao = 0.0;
         if (banda_ > 0.0) {
             utilizacao = 1.0 / banda_;
         } else {
             std::cout << "[AVISO] Enlace " << id_ << " tem banda <= 0. Utilizando 0%.\n";
         }
-        
         utilizacaoAcumulada_ += utilizacao;
 
         std::cout << "[t=" << tempo << "] " << origem
                   << " -> " << destino
-                  << " (" << id_ << ", latência=" << latencia_ << "ms) OK\n";
+                  << " (" << id_ << ", latencia=" << latencia_ << "ms) OK\n";
 
-        // Chamada segura ao método virtual
         noDestino->receberPacote(origem, destino, tempo);
 
         return true;
@@ -114,7 +142,7 @@ bool Enlace::transmitir(const std::string& origem,
         pacotesDescartados_++;
         return false;
     } catch (const std::exception& e) {
-        std::cout << "[ERRO] Exceção em transmissão: " << e.what() << "\n";
+        std::cout << "[ERRO] Excecao em transmissao: " << e.what() << "\n";
         pacotesDescartados_++;
         return false;
     }
@@ -123,11 +151,22 @@ bool Enlace::transmitir(const std::string& origem,
 int    Enlace::getPacotesTransmitidos() const { return pacotesTransmitidos_; }
 int    Enlace::getPacotesDescartados()  const { return pacotesDescartados_; }
 
+/**
+ * @brief Calcula a utilizacao media acumulada do enlace.
+ *
+ * Retorna zero se nenhum passo de tempo foi registrado ainda,
+ * evitando divisao por zero.
+ */
 double Enlace::getUtilizacao() const {
     if (numPassos_ == 0) return 0.0;
     return utilizacaoAcumulada_ / numPassos_;
 }
 
+/**
+ * @brief Envia os contadores acumulados ao ColetorDeMetricas.
+ *
+ * Chamado pelo Simulador ao final de cada coleta de metricas.
+ */
 void Enlace::reportarMetricas(ColetorDeMetricas& coletor) const {
     coletor.registrarEnlace(id_,
                             pacotesTransmitidos_,
