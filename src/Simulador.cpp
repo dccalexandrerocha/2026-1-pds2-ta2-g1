@@ -79,7 +79,23 @@ void Simulador::retomar() {
     std::cout << "[t=" << escalonador_.getTempoAtual() << "] Simulacao retomada.\n";
 }
 
+void Simulador::coletarMetricas() {
+    coletor_.reset();
+    for (Enlace* e : topologia_.getEnlaces()) {
+        if (e) e->reportarMetricas(coletor_);
+    }
+    for (No* n : topologia_.getNos()) {
+        if (n) {
+            coletor_.registrarNo(n->getId(),
+                                 n->getPacotesEnviados(),
+                                 n->getPacotesRecebidos(),
+                                 n->getPacotesDescartados());
+        }
+    }
+}
+
 void Simulador::encerrar() {
+    coletarMetricas();
     coletor_.exibirResumo();
     estado_ = EstadoSimulacao::ENCERRADO;
     std::cout << "[t=" << escalonador_.getTempoAtual() << "] Simulacao encerrada.\n";
@@ -332,12 +348,14 @@ void Simulador::processarComando(const std::string& linha) {
             alterarEstadoEnlace(tokens[1], true);
 
         } else if (cmd == "metricas") {
+            coletarMetricas();
             coletor_.exibirResumo();
 
         } else if (cmd == "exportar") {
             if (tokens.size() < 2) {
                 throw ExcecaoEntrada("Uso: exportar <arquivo.csv>");
             }
+            coletarMetricas();
             if (coletor_.exportarCSV(tokens[1])) {
                 std::cout << "[OK] Métricas exportadas para " << tokens[1] << "\n";
             } else {

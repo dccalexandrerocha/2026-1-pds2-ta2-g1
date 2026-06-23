@@ -4,7 +4,13 @@ CXXFLAGS := -std=c++17 -Wall -Wextra -Iinclude
 # Flags de cobertura (usadas apenas no target test)
 COV_FLAGS := --coverage -fprofile-arcs -ftest-coverage -O0
 
-# Arquivos-fonte (todos exceto main.cpp, que nao entra nos testes)
+ifeq ($(OS),Windows_NT)
+    GCOVR := python -m gcovr
+else
+    GCOVR := gcovr
+endif
+
+# Arquivos-fonte (todos exceto main.cpp)
 SRCS := src/No.cpp \
         src/Enlace.cpp \
         src/ColetorDeMetricas.cpp \
@@ -19,8 +25,25 @@ TARGET := simulador
 # Executavel de testes
 TEST_TARGET := build/tests/teste_runner
 
+# Detecta o sistema operacional
+ifeq ($(OS),Windows_NT)
+    MKDIR   = if not exist "build\tests" mkdir "build\tests"
+    MKDIR  += & if not exist "coverage" mkdir "coverage"
+    RMDIR   = if exist "build" rmdir /s /q "build"
+    RMDIR  += & if exist "coverage" rmdir /s /q "coverage"
+    RM      = del /f /q
+    RUN     = $(TEST_TARGET)
+    FIND_DEL = (for %%f in (build\tests\*.gcda) do del /f /q "%%f") 2>nul & exit /b 0
+else
+    MKDIR   = mkdir -p build/tests coverage
+    RMDIR   = rm -rf build/ coverage/
+    RM      = rm -f
+    RUN     = ./$(TEST_TARGET)
+    FIND_DEL = find build/tests -name "*.gcda" -delete 2>/dev/null; true
+endif
+
 # ─── Cria diretorios necessarios ──────────────────────────────────────────────
-$(shell mkdir -p build/tests coverage)
+$(shell $(MKDIR))
 
 # ─── Target padrao: compila o simulador ───────────────────────────────────────
 all: $(TARGET)
@@ -30,17 +53,17 @@ $(TARGET): $(SRCS) src/main.cpp
 
 # ─── Testes com cobertura ─────────────────────────────────────────────────────
 test: $(TEST_TARGET)
-	@find build/tests -name "*.gcda" -delete 2>/dev/null; true
+	@$(FIND_DEL)
 	@echo ""
 	@echo "========================================"
 	@echo "  Executando testes de unidade..."
 	@echo "========================================"
-	./$(TEST_TARGET) --duration=true
+	$(RUN) --duration=true
 	@echo ""
 	@echo "========================================"
 	@echo "  Gerando relatorio de cobertura..."
 	@echo "========================================"
-	gcovr --root . \
+	$(GCOVR) --root . \
 	      --exclude tests/ \
 	      --exclude src/main.cpp \
 	      --print-summary \
@@ -58,10 +81,7 @@ $(TEST_TARGET): $(SRCS) tests/testes.cpp
 
 # ─── Limpeza ──────────────────────────────────────────────────────────────────
 clean:
-	rm -f $(TARGET)
-	rm -f $(TEST_TARGET)
-	rm -f build/tests/*.gcda build/tests/*.gcno
-	rm -f src/*.gcda src/*.gcno
-	rm -rf coverage/
+	$(RMDIR)
+	$(RM) $(TARGET)
 
 .PHONY: all test clean

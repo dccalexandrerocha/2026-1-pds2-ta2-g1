@@ -88,15 +88,19 @@ public:
     /// @brief Retorna o estado atual da simulacao.
     EstadoSimulacao getEstado() const;
 
-private:
     /**
      * @brief Interpreta e executa um comando digitado pelo usuario.
      * @param linha Linha de texto lida do terminal.
      */
     void processarComando(const std::string& linha);
 
+private:
+
     /// @brief Exibe os comandos disponiveis no terminal.
     void exibirAjuda() const;
+
+    /// @brief Coleta metricas de todos os nos e enlaces para o coletor.
+    void coletarMetricas();
 
     EstadoSimulacao               estado_;
     TopologiaDeRede               topologia_;

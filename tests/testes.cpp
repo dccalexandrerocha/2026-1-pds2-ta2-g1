@@ -8,6 +8,7 @@
 #include "TopologiaDeRede.hpp"
 #include "ProtocoloDeRoteamento.hpp"
 #include "Simulador.hpp"
+#include "Excecoes.hpp"
 
 #include <memory>
 #include <vector>
@@ -123,18 +124,17 @@ TEST_SUITE("ColetorDeMetricas") {
         CHECK(c.getTotalPerdidos()  == 0);
     }
 
-    TEST_CASE("exportarCSV retorna false para caminho invalido") {
+    TEST_CASE("exportarCSV lanca excecao para caminho invalido") {
         ColetorDeMetricas c;
         c.registrarEnlace("E1", 1, 0, 0.1);
-        bool ok = c.exportarCSV("/caminho/invalido/impossivel/arquivo.csv");
-        CHECK(ok == false);
+        CHECK_THROWS_AS(c.exportarCSV("/caminho/invalido/impossivel/arquivo.csv"), ExcecaoArquivo);
     }
 
     TEST_CASE("exportarCSV retorna true e gera arquivo") {
         ColetorDeMetricas c;
         c.registrarEnlace("E1", 2, 0, 0.2);
         c.registrarNo("H1", 1, 1, 0);
-        bool ok = c.exportarCSV("/tmp/teste_metricas.csv");
+        bool ok = c.exportarCSV("build/teste_metricas.csv");
         CHECK(ok == true);
     }
 }
@@ -297,7 +297,7 @@ TEST_SUITE("TopologiaDeRede") {
     TEST_CASE("salvarJSON cria arquivo") {
         TopologiaDeRede t;
         t.adicionarNo(std::make_unique<Host>("H1", "1.1.1.1"));
-        bool ok = t.salvarJSON("/tmp/topo_teste.json");
+        bool ok = t.salvarJSON("build/topo_teste.json");
         CHECK(ok == true);
     }
 
@@ -467,5 +467,280 @@ TEST_SUITE("Simulador") {
         sim.iniciar();
         sim.encerrar();
         CHECK(sim.getEstado() == EstadoSimulacao::ENCERRADO);
+    }
+}
+
+// ─── Enlace ──────────────────────────────────────────────────────────────────
+
+TEST_SUITE("Enlace") {
+
+    TEST_CASE("construtor - atributos basicos") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        CHECK(e.getId() == "E1");
+        CHECK(e.getNoA() == &h1);
+        CHECK(e.getNoB() == &h2);
+        CHECK(e.getBanda() == doctest::Approx(100.0));
+        CHECK(e.getLatencia() == doctest::Approx(5.0));
+        CHECK(e.isAtivo() == true);
+        CHECK(e.getPacotesTransmitidos() == 0);
+        CHECK(e.getPacotesDescartados() == 0);
+    }
+
+    TEST_CASE("setAtivo desativa e reativa enlace") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        e.setAtivo(false);
+        CHECK(e.isAtivo() == false);
+        e.setAtivo(true);
+        CHECK(e.isAtivo() == true);
+    }
+
+    TEST_CASE("transmitir - enlace ativo incrementa transmitidos") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        bool ok = e.transmitir("H1", "H2", 1);
+        CHECK(ok == true);
+        CHECK(e.getPacotesTransmitidos() == 1);
+        CHECK(e.getPacotesDescartados() == 0);
+    }
+
+    TEST_CASE("transmitir - enlace inativo incrementa descartados") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        e.setAtivo(false);
+        bool ok = e.transmitir("H1", "H2", 2);
+        CHECK(ok == false);
+        CHECK(e.getPacotesDescartados() == 1);
+        CHECK(e.getPacotesTransmitidos() == 0);
+    }
+
+    TEST_CASE("transmitir - origem ou destino vazio retorna false") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        bool ok = e.transmitir("", "H2", 1);
+        CHECK(ok == false);
+        CHECK(e.getPacotesDescartados() == 1);
+    }
+
+    TEST_CASE("getUtilizacao retorna 0 antes de qualquer transmissao") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        CHECK(e.getUtilizacao() == doctest::Approx(0.0));
+    }
+
+    TEST_CASE("getUtilizacao retorna valor apos transmissao") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        e.transmitir("H1", "H2", 1);
+        CHECK(e.getUtilizacao() > 0.0);
+    }
+
+    TEST_CASE("reportarMetricas popula coletor") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        e.transmitir("H1", "H2", 1);
+        ColetorDeMetricas c;
+        e.reportarMetricas(c);
+        // reportarMetricas registra no coletor de enlaces; perdidos deve ser 0
+        CHECK(c.getTotalPerdidos() == 0);
+    }
+
+    TEST_CASE("transmitir multiplas vezes acumula contadores") {
+        Host h1("H1", "1.1.1.1");
+        Host h2("H2", "1.1.1.2");
+        Enlace e("E1", &h1, &h2, 100.0, 5.0);
+        e.transmitir("H1", "H2", 1);
+        e.transmitir("H1", "H2", 2);
+        e.setAtivo(false);
+        e.transmitir("H1", "H2", 3);
+        CHECK(e.getPacotesTransmitidos() == 2);
+        CHECK(e.getPacotesDescartados() == 1);
+    }
+}
+
+// ─── Simulador::processarComando ─────────────────────────────────────────────
+
+TEST_SUITE("SimuladorComandos") {
+
+    TEST_CASE("processarComando - ajuda nao lanca excecao") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("ajuda"));
+    }
+
+    TEST_CASE("processarComando - add_no host") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("add_no host H1"));
+    }
+
+    TEST_CASE("processarComando - add_no roteador") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("add_no roteador R1"));
+    }
+
+    TEST_CASE("processarComando - add_no switch") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("add_no switch S1"));
+    }
+
+    TEST_CASE("processarComando - add_no tipo invalido") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("add_no invalido X1"));
+    }
+
+    TEST_CASE("processarComando - add_no poucos argumentos") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("add_no host"));
+    }
+
+    TEST_CASE("processarComando - add_enlace valido") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        sim.processarComando("add_no host H2");
+        CHECK_NOTHROW(sim.processarComando("add_enlace E1 H1 H2 latencia=10"));
+    }
+
+    TEST_CASE("processarComando - add_enlace no inexistente") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        CHECK_NOTHROW(sim.processarComando("add_enlace E1 H1 XPTO latencia=5"));
+    }
+
+    TEST_CASE("processarComando - add_enlace self-loop") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        CHECK_NOTHROW(sim.processarComando("add_enlace E1 H1 H1 latencia=5"));
+    }
+
+    TEST_CASE("processarComando - add_enlace poucos argumentos") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("add_enlace E1 H1"));
+    }
+
+    TEST_CASE("processarComando - iniciar e encerrar") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        sim.processarComando("add_no host H2");
+        sim.processarComando("add_enlace E1 H1 H2 latencia=5");
+        CHECK_NOTHROW(sim.processarComando("iniciar"));
+        CHECK(sim.getEstado() == EstadoSimulacao::EM_EXECUCAO);
+        CHECK_NOTHROW(sim.processarComando("encerrar"));
+        CHECK(sim.getEstado() == EstadoSimulacao::ENCERRADO);
+    }
+
+    TEST_CASE("processarComando - pausar e retomar") {
+        Simulador sim;
+        sim.processarComando("iniciar");
+        CHECK_NOTHROW(sim.processarComando("pausar"));
+        CHECK(sim.getEstado() == EstadoSimulacao::PAUSADO);
+        CHECK_NOTHROW(sim.processarComando("retomar"));
+        CHECK(sim.getEstado() == EstadoSimulacao::EM_EXECUCAO);
+    }
+
+    TEST_CASE("processarComando - proximo avanca passo") {
+        Simulador sim;
+        sim.processarComando("iniciar");
+        CHECK_NOTHROW(sim.processarComando("proximo"));
+    }
+
+    TEST_CASE("processarComando - injetar com rede completa") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        sim.processarComando("add_no host H2");
+        sim.processarComando("add_enlace E1 H1 H2 latencia=5");
+        sim.processarComando("iniciar");
+        CHECK_NOTHROW(sim.processarComando("injetar H1 H2"));
+    }
+
+    TEST_CASE("processarComando - injetar origem igual destino") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        sim.processarComando("iniciar");
+        CHECK_NOTHROW(sim.processarComando("injetar H1 H1"));
+    }
+
+    TEST_CASE("processarComando - injetar no inexistente") {
+        Simulador sim;
+        sim.processarComando("iniciar");
+        CHECK_NOTHROW(sim.processarComando("injetar H1 H2"));
+    }
+
+    TEST_CASE("processarComando - injetar poucos argumentos") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("injetar H1"));
+    }
+
+    TEST_CASE("processarComando - falha e recuperar enlace") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        sim.processarComando("add_no host H2");
+        sim.processarComando("add_enlace E1 H1 H2 latencia=5");
+        sim.processarComando("iniciar");
+        CHECK_NOTHROW(sim.processarComando("falha E1"));
+        CHECK_NOTHROW(sim.processarComando("recuperar E1"));
+    }
+
+    TEST_CASE("processarComando - falha poucos argumentos") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("falha"));
+    }
+
+    TEST_CASE("processarComando - recuperar poucos argumentos") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("recuperar"));
+    }
+
+    TEST_CASE("processarComando - metricas nao lanca excecao") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("metricas"));
+    }
+
+    TEST_CASE("processarComando - exportar para arquivo valido") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("exportar build/test_export.csv"));
+    }
+
+    TEST_CASE("processarComando - exportar poucos argumentos") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("exportar"));
+    }
+
+    TEST_CASE("processarComando - exportar caminho invalido") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("exportar /caminho/invalido/test.csv"));
+    }
+
+    TEST_CASE("processarComando - comando desconhecido") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando("xyz_comando_inexistente"));
+    }
+
+    TEST_CASE("processarComando - linha vazia nao faz nada") {
+        Simulador sim;
+        CHECK_NOTHROW(sim.processarComando(""));
+    }
+
+    TEST_CASE("processarComando - injetar sem rota disponivel") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        sim.processarComando("add_no host H2");
+        sim.processarComando("add_enlace E1 H1 H2 latencia=5");
+        sim.processarComando("iniciar");
+        sim.processarComando("falha E1");  // bloqueia a unica rota
+        CHECK_NOTHROW(sim.processarComando("injetar H1 H2"));
+    }
+
+    TEST_CASE("processarComando - add_no duplicado") {
+        Simulador sim;
+        sim.processarComando("add_no host H1");
+        CHECK_NOTHROW(sim.processarComando("add_no host H1"));  // duplicado
     }
 }
