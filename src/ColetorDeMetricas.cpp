@@ -1,3 +1,14 @@
+/**
+ * @file ColetorDeMetricas.cpp
+ * @brief Implementacao do coletor e exportador de metricas.
+ *
+ * Acumula contadores de enlaces e nos ao longo da simulacao
+ * e os disponibiliza para exibicao no terminal ou exportacao
+ * em formato CSV.
+ *
+ * @author Grupo 1 - PDS2 TA2 2026/1
+ */
+
 #include "ColetorDeMetricas.hpp"
 #include "Excecoes.hpp"
 #include "Validacao.hpp"
@@ -5,6 +16,13 @@
 #include <fstream>
 #include <algorithm>
 
+/**
+ * @brief Acumula os contadores de um enlace.
+ *
+ * Valida os parametros antes de somar aos acumuladores. Atualiza
+ * o pico de utilizacao se o valor atual for maior que o maximo
+ * registrado ate entao.
+ */
 void ColetorDeMetricas::registrarEnlace(const std::string& idEnlace,
                                         int transmitidos,
                                         int descartados,
@@ -26,6 +44,12 @@ void ColetorDeMetricas::registrarEnlace(const std::string& idEnlace,
     }
 }
 
+/**
+ * @brief Acumula os contadores de um no.
+ *
+ * Nao exige validacao extra alem do que e garantido pelo chamador;
+ * simplesmente soma aos acumuladores internos.
+ */
 void ColetorDeMetricas::registrarNo(const std::string& idNo,
                                     int recebidos,
                                     int enviados,
@@ -37,6 +61,13 @@ void ColetorDeMetricas::registrarNo(const std::string& idNo,
     d.descartados += descartados;
 }
 
+/**
+ * @brief Imprime o resumo de metricas no terminal.
+ *
+ * Para cada enlace exibe transmitidos, descartados, utilizacao
+ * media e utilizacao maxima. Para cada no exibe recebidos,
+ * enviados e descartados. Por fim, exibe os totais globais.
+ */
 void ColetorDeMetricas::exibirResumo() const {
     std::cout << "\n=== Metricas por Enlace ===\n";
     for (const auto& par : enlaces_) {
@@ -69,24 +100,31 @@ void ColetorDeMetricas::exibirResumo() const {
               << "Pacotes perdidos:  " << getTotalPerdidos()  << "\n";
 }
 
+/**
+ * @brief Grava as metricas em um arquivo CSV.
+ *
+ * Gera duas secoes no CSV: uma para enlaces (com utilizacao media
+ * e maxima) e outra para nos. Propaga ExcecaoArquivo em caso de
+ * falha de I/O para que o chamador possa exibir mensagem adequada.
+ *
+ * @throws ExcecaoArquivo se o arquivo nao puder ser aberto ou gravado.
+ */
 bool ColetorDeMetricas::exportarCSV(const std::string& caminho) const {
     try {
         if (caminho.empty()) {
-            throw ExcecaoArquivo("Caminho do arquivo não pode estar vazio");
+            throw ExcecaoArquivo("Caminho do arquivo nao pode estar vazio");
         }
 
         std::ofstream arquivo(caminho);
-        
-        // Validação defensiva: verificar se arquivo foi aberto
+
         if (!arquivo.is_open()) {
-            throw ExcecaoArquivo("Não foi possível abrir arquivo '" + caminho + 
-                               "' para escrita (verifique permissões)");
+            throw ExcecaoArquivo("Nao foi possivel abrir arquivo '" + caminho +
+                               "' para escrita (verifique permissoes)");
         }
 
-        // Verificar se a escrita foi bem-sucedida
         arquivo << "tipo,id,transmitidos,descartados,util_media,util_max\n";
         if (!arquivo.good()) {
-            throw ExcecaoArquivo("Erro ao escrever cabeçalho no arquivo");
+            throw ExcecaoArquivo("Erro ao escrever cabecalho no arquivo");
         }
 
         for (const auto& par : enlaces_) {
@@ -100,7 +138,7 @@ bool ColetorDeMetricas::exportarCSV(const std::string& caminho) const {
                     << d.descartados  << ","
                     << media          << ","
                     << d.utilizacaoMax<< "\n";
-            
+
             if (!arquivo.good()) {
                 throw ExcecaoArquivo("Erro ao escrever dados de enlace no arquivo");
             }
@@ -108,7 +146,7 @@ bool ColetorDeMetricas::exportarCSV(const std::string& caminho) const {
 
         arquivo << "tipo,id,recebidos,enviados,descartados,,\n";
         if (!arquivo.good()) {
-            throw ExcecaoArquivo("Erro ao escrever cabeçalho de nós no arquivo");
+            throw ExcecaoArquivo("Erro ao escrever cabecalho de nos no arquivo");
         }
 
         for (const auto& par : nos_) {
@@ -118,26 +156,31 @@ bool ColetorDeMetricas::exportarCSV(const std::string& caminho) const {
                     << d.recebidos<< ","
                     << d.enviados << ","
                     << d.descartados << ",,\n";
-            
+
             if (!arquivo.good()) {
-                throw ExcecaoArquivo("Erro ao escrever dados de nó no arquivo");
+                throw ExcecaoArquivo("Erro ao escrever dados de no no arquivo");
             }
         }
 
         arquivo.close();
         if (!arquivo) {
-            throw ExcecaoArquivo("Erro ao fechar arquivo de saída");
+            throw ExcecaoArquivo("Erro ao fechar arquivo de saida");
         }
 
         return true;
 
     } catch (const ExcecaoArquivo&) {
-        throw;  // Re-lança para o chamador
+        throw;
     } catch (const std::exception& e) {
-        throw ExcecaoArquivo(std::string("Exceção ao exportar CSV: ") + e.what());
+        throw ExcecaoArquivo(std::string("Excecao ao exportar CSV: ") + e.what());
     }
 }
 
+/**
+ * @brief Soma os pacotes enviados (processados) de todos os nos.
+ *
+ * Representa o total de pacotes que chegaram ao seu destino final.
+ */
 int ColetorDeMetricas::getTotalEntregues() const {
     int total = 0;
     for (const auto& par : nos_) {
@@ -146,6 +189,12 @@ int ColetorDeMetricas::getTotalEntregues() const {
     return total;
 }
 
+/**
+ * @brief Soma os pacotes descartados em enlaces e nos.
+ *
+ * Inclui descartes por falha de enlace e por nos que nao
+ * eram o destino correto do pacote.
+ */
 int ColetorDeMetricas::getTotalPerdidos() const {
     int total = 0;
     for (const auto& par : enlaces_) {
@@ -157,11 +206,16 @@ int ColetorDeMetricas::getTotalPerdidos() const {
     return total;
 }
 
+/**
+ * @brief Zera todos os contadores acumulados.
+ *
+ * Chamado antes de cada coleta para evitar acumulo duplo entre
+ * chamadas sucessivas ao metodo metricas do Simulador.
+ */
 void ColetorDeMetricas::reset() {
     if (enlaces_.empty() && nos_.empty()) {
         return;
     }
-
     enlaces_.clear();
     nos_.clear();
 }

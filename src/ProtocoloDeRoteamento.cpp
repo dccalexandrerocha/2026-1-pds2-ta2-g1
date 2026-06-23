@@ -1,3 +1,15 @@
+/**
+ * @file ProtocoloDeRoteamento.cpp
+ * @brief Implementacao do algoritmo de Dijkstra para roteamento.
+ *
+ * RoteamentoDijkstra calcula o caminho de menor custo (medido
+ * em latencia acumulada) entre dois nos da rede, ignorando enlaces
+ * marcados como falhos. O caminho e reconstituido via mapa de
+ * predecessores e armazenado na tabela interna para consulta.
+ *
+ * @author Grupo 1 - PDS2 TA2 2026/1
+ */
+
 #include "ProtocoloDeRoteamento.hpp"
 #include "TopologiaDeRede.hpp"
 #include "Enlace.hpp"
@@ -8,55 +20,65 @@
 #include <limits>
 #include <algorithm>
 
-// ── RoteamentoDijkstra ────────────────────────────────────────────────────────
-
+/**
+ * @brief Executa o algoritmo de Dijkstra na topologia atual.
+ *
+ * Inicializa as distancias de todos os nos como infinito, exceto
+ * a origem (distancia 0). A fila de prioridade processa o no de
+ * menor custo acumulado a cada iteracao, relaxando os vizinhos
+ * alcancaveis por enlaces ativos.
+ *
+ * Ao final, reconstroi o caminho percorrendo o mapa de predecessores
+ * do destino ate a origem e inverte a sequencia. O proximo salto a
+ * partir da origem e armazenado na tabela interna tabelas_ para uso
+ * futuro.
+ *
+ * Falhas sao capturadas internamente; em caso de erro, retorna
+ * vetor vazio (sem caminho disponivel).
+ */
 std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
     const TopologiaDeRede& topologia,
     const std::string& origem,
     const std::string& destino)
 {
     try {
-        // Validações defensivas
         if (origem.empty() || destino.empty()) {
             throw ExcecaoRede("Origem ou destino vazio em calcularCaminho()");
         }
 
         if (origem == destino) {
-            // Caso trivial: origem e destino sao o mesmo no
             return {origem};
         }
 
-        // Garante que os nós existem
-        No* noOrigem = topologia.getNo(origem);
+        No* noOrigem  = topologia.getNo(origem);
         No* noDestino = topologia.getNo(destino);
-        
+
         if (!noOrigem) {
-            throw ExcecaoRede("Nó de origem '" + origem + "' não existe");
+            throw ExcecaoRede("No de origem '" + origem + "' nao existe");
         }
         if (!noDestino) {
-            throw ExcecaoRede("Nó de destino '" + destino + "' não existe");
+            throw ExcecaoRede("No de destino '" + destino + "' nao existe");
         }
 
         std::vector<No*> nos = topologia.getNos();
         if (nos.empty()) {
-            throw ExcecaoRede("Topologia vazia (sem nós)");
+            throw ExcecaoRede("Topologia vazia (sem nos)");
         }
 
-        // dist: menor custo acumulado até cada nó
+        // Inicializa distancias como infinito
         std::unordered_map<std::string, double> dist;
-        // anterior: de onde viemos para chegar em cada nó
         std::unordered_map<std::string, std::string> anterior;
 
         for (No* no : nos) {
             if (!no) {
-                std::cout << "[AVISO] Nó nulo encontrado em calcularCaminho()\n";
+                std::cout << "[AVISO] No nulo encontrado em calcularCaminho()\n";
                 continue;
             }
             dist[no->getId()] = std::numeric_limits<double>::infinity();
         }
         dist[origem] = 0.0;
 
-        // Fila de prioridade: (custo, id)
+        // Fila de prioridade: (custo, id_no)
         using Par = std::pair<double, std::string>;
         std::priority_queue<Par, std::vector<Par>, std::greater<Par>> pq;
         pq.push({0.0, origem});
@@ -65,50 +87,35 @@ std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
             auto [custoAtual, atual] = pq.top();
             pq.pop();
 
-            // Validação: nó não deve estar no mapa de distâncias
-            if (dist.find(atual) == dist.end()) {
-                continue;  // Nó foi deletado ou é inválido
-            }
-
-            if (custoAtual > dist[atual]) continue;  // entrada obsoleta
+            if (dist.find(atual) == dist.end()) continue;
+            if (custoAtual > dist[atual]) continue;
             if (atual == destino) break;
 
-            std::vector<Enlace*> vizinhos = topologia.getVizinhos(atual);
-            for (Enlace* e : vizinhos) {
-                // Validação defensiva: enlace nulo
+            for (Enlace* e : topologia.getVizinhos(atual)) {
                 if (!e) {
                     std::cout << "[AVISO] Enlace nulo em calcularCaminho()\n";
                     continue;
                 }
-
                 if (!e->isAtivo()) continue;
 
-                // Validação defensiva: nós nulos
                 No* noA = e->getNoA();
                 No* noB = e->getNoB();
                 if (!noA || !noB) {
-                    std::cout << "[AVISO] Enlace com nó nulo em calcularCaminho()\n";
+                    std::cout << "[AVISO] Enlace com no nulo em calcularCaminho()\n";
                     continue;
                 }
 
-                // Validação: latência não negativa
                 double latencia = e->getLatencia();
                 if (latencia < 0.0) {
-                    std::cout << "[AVISO] Enlace com latência negativa\n";
+                    std::cout << "[AVISO] Enlace com latencia negativa\n";
                     continue;
                 }
 
-                std::string vizinho;
-                if (noA->getId() == atual) {
-                    vizinho = noB->getId();
-                } else {
-                    vizinho = noA->getId();
-                }
+                std::string vizinho = (noA->getId() == atual)
+                                      ? noB->getId()
+                                      : noA->getId();
 
-                // Verificar se vizinho está em dist
-                if (dist.find(vizinho) == dist.end()) {
-                    continue;  // Nó vizinho não existe
-                }
+                if (dist.find(vizinho) == dist.end()) continue;
 
                 double novoCusto = dist[atual] + latencia;
                 if (novoCusto < dist[vizinho]) {
@@ -119,26 +126,23 @@ std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
             }
         }
 
-        // Reconstrói o caminho do destino até a origem
+        // Sem caminho disponivel
         if (dist[destino] == std::numeric_limits<double>::infinity()) {
-            return {};   // sem caminho
+            return {};
         }
 
+        // Reconstroi o caminho do destino ate a origem
         std::vector<std::string> caminho;
         std::string atual = destino;
-        
-        // Proteção contra loop infinito
+
         int tentativas = 0;
-        const int maxTentativas = nos.size() + 10;
-        
+        const int maxTentativas = static_cast<int>(nos.size()) + 10;
+
         while (atual != origem && tentativas < maxTentativas) {
             caminho.push_back(atual);
-            
             if (anterior.find(atual) == anterior.end()) {
-                // Caminho quebrado - não deveria acontecer
-                throw ExcecaoRede("Caminho quebrado durante reconstrução");
+                throw ExcecaoRede("Caminho quebrado durante reconstrucao");
             }
-            
             atual = anterior[atual];
             tentativas++;
         }
@@ -150,7 +154,7 @@ std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
         caminho.push_back(origem);
         std::reverse(caminho.begin(), caminho.end());
 
-        // Armazena na tabela interna
+        // Armazena proximo salto na tabela de roteamento
         if (caminho.size() > 1) {
             tabelas_[origem][destino] = caminho[1];
         }
@@ -161,11 +165,18 @@ std::vector<std::string> RoteamentoDijkstra::calcularCaminho(
         std::cout << "[AVISO] " << e.what() << "\n";
         return {};
     } catch (const std::exception& e) {
-        std::cout << "[AVISO] Exceção em Dijkstra: " << e.what() << "\n";
+        std::cout << "[AVISO] Excecao em Dijkstra: " << e.what() << "\n";
         return {};
     }
 }
 
+/**
+ * @brief Imprime no terminal a tabela de roteamento de um no.
+ *
+ * Exibe todos os destinos conhecidos e o proximo salto associado.
+ * Se o no nao tiver tabela ainda (nenhum caminho calculado), exibe
+ * uma mensagem indicando que a tabela esta vazia.
+ */
 void RoteamentoDijkstra::exibirTabela(const std::string& idNo) const {
     if (idNo.empty()) {
         std::cout << "[AVISO] ID do no vazio ao exibir tabela de roteamento.\n";
