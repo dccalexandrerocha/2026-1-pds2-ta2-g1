@@ -559,7 +559,7 @@ void Simulador::exibirAutores() const {
         << "   |  (____)  |    \n"
         << "   +----------+   \n"
         << "\n"
-        << "   +----------+   Lucas Alves\n"
+        << "   +----------+   Lucas Fonseca\n"
         << "   |  *    *  |   Matricula: 2025019437\n"
         << "   |    ~~    |   \n"
         << "   |  /----\\ |   \n"
