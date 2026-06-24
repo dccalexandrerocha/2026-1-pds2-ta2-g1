@@ -533,15 +533,14 @@ void Simulador::exibirAjuda() const {
 // ── Autores ───────────────────────────────────────────────────────────────────
 
 /**
- * @brief Exibe os autores do projeto com arte ASCII e abre o video de agradecimento.
+ * @brief Exibe os autores do projeto com arte ASCII.
  *
  * Imprime uma tela de creditos com carinhas em ASCII art para cada
- * integrante do grupo e tenta abrir o arquivo vid.mp4 localizado na
- * raiz do projeto usando o player padrao do sistema operacional.
+ * integrante do grupo.
  */
 void Simulador::exibirAutores() const {
     imprimirSeparador(60);
-    std::cout << "  Simulador de Rede | PDS2 TA2 2026/1 | Grupo 1\n";
+    std::cout << "  Simulador de Rede | PDS2 TA2 2026/1 | Grupo 15\n";
     std::cout << "  Obrigado por usar nosso projeto!\n";
     imprimirSeparador(60);
     std::cout << "\n";
@@ -572,17 +571,4 @@ void Simulador::exibirAutores() const {
         << "   +----------+   \n"
         << "\n";
 
-    imprimirSeparador(60);
-    std::cout << "  Abrindo video de agradecimento...\n";
-    imprimirSeparador(60);
-    std::cout << "\n";
-
-    // Tenta abrir vid.mp4 na raiz do projeto com o player padrao do SO
-#ifdef _WIN32
-    std::system("start vid.mp4");
-#elif __APPLE__
-    std::system("open vid.mp4");
-#else
-    std::system("xdg-open vid.mp4 2>/dev/null || vlc vid.mp4 2>/dev/null || mpv vid.mp4 2>/dev/null");
-#endif
 }
