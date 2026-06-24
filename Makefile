@@ -1,6 +1,9 @@
 CXX      := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Iinclude
 
+# Biblioteca do std::filesystem (necessaria no g++ 8/9; inofensiva nas versoes mais novas)
+LDFLAGS  := -lstdc++fs
+
 # Flags de cobertura (usadas apenas no target test)
 COV_FLAGS := --coverage -fprofile-arcs -ftest-coverage -O0
 
@@ -49,7 +52,7 @@ $(shell $(MKDIR))
 all: $(TARGET)
 
 $(TARGET): $(SRCS) src/main.cpp
-	$(CXX) $(CXXFLAGS) -o $@ $^
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # ─── Testes com cobertura ─────────────────────────────────────────────────────
 test: $(TEST_TARGET)
@@ -77,7 +80,7 @@ $(TEST_TARGET): $(SRCS) tests/testes.cpp
 	$(CXX) $(CXXFLAGS) $(COV_FLAGS) \
 	    -Itests \
 	    -o $@ \
-	    $(SRCS) tests/testes.cpp
+	    $(SRCS) tests/testes.cpp $(LDFLAGS)
 
 # ─── Limpeza ──────────────────────────────────────────────────────────────────
 clean:

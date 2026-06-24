@@ -230,7 +230,71 @@ Exibe os integrantes do grupo com arte ASCII e abre um vídeo de agradecimento (
 
 ---
 
-## Referência de comandos
+## Carregar comandos de um arquivo
+
+Para não digitar a topologia toda vez, você pode colocar os comandos em um
+arquivo `.txt` — no mesmo formato usado no terminal — e carregá-lo com o
+comando `carregar`. Cada linha do arquivo é processada exatamente como se
+tivesse sido digitada, então qualquer comando é aceito (não só `add_no` e
+`add_enlace`).
+
+### Formato do arquivo
+
+```
+# Linhas iniciadas por '#' são comentários e são ignoradas.
+# Linhas em branco também são ignoradas.
+
+add_no host H1
+add_no roteador R1
+add_no roteador R2
+add_no host H2
+
+add_enlace E1 H1 R1 latencia=5
+add_enlace E2 R1 R2 latencia=10
+add_enlace E3 R2 H2 latencia=5
+```
+
+> Um arquivo pronto, `rede_exemplo.txt`, acompanha o projeto na raiz.
+
+### Como usar
+
+O caminho informado pode ser **relativo** ou **absoluto** — internamente ele é
+resolvido para um caminho absoluto, e o caminho completo efetivamente aberto é
+exibido no terminal:
+
+```
+> carregar rede_exemplo.txt
+------------------------------------------------------------
+  Carregando comandos de:
+  /caminho/completo/ate/o/projeto/rede_exemplo.txt
+------------------------------------------------------------
+> add_no host H1
+[OK] No H1 (host) adicionado.
+...
+------------------------------------------------------------
+  Fim do arquivo.
+------------------------------------------------------------
+
+> iniciar
+> injetar H1 H2
+```
+
+**Observações:**
+
+- O caminho relativo é resolvido a partir do diretório de onde o executável foi
+  chamado (o diretório de trabalho atual), **não** da raiz do projeto. Para
+  rodar de qualquer lugar sem se preocupar com isso, use um caminho absoluto:
+  `carregar /drive/usuario/projeto/rede_exemplo.txt`.
+- Se o arquivo não existir, o programa exibe
+  `[ERRO_ARQUIVO: Arquivo nao encontrado: '...']` e continua no terminal — sem
+  encerrar a sessão.
+- Erros em um comando individual do arquivo são exibidos, mas não interrompem a
+  leitura das linhas seguintes. Se a linha `encerrar` aparecer no arquivo, a
+  leitura para ali.
+
+---
+
+
 
 | Comando                                     | Quando usar             | Descrição                                     |
 | ------------------------------------------- | ----------------------- | --------------------------------------------- |
@@ -245,9 +309,10 @@ Exibe os integrantes do grupo com arte ASCII e abre um vídeo de agradecimento (
 | `recuperar <idEnlace>`                      | Durante a simulação     | Restaura um enlace falho                      |
 | `metricas`                                  | Qualquer momento        | Exibe métricas no terminal                    |
 | `exportar <arquivo.csv>`                    | Qualquer momento        | Exporta métricas para um arquivo CSV          |
+| `carregar <arquivo.txt>`                    | Qualquer momento        | Executa comandos a partir de um arquivo de texto |
 | `encerrar`                                  | Qualquer momento        | Encerra a simulação                           |
 | `ajuda`                                     | Qualquer momento        | Lista os comandos disponíveis                 |
-| `autores`                                   | Qualquer momento        | Exibe os integrantes e abre o video           |
+| `autores`                                   | Qualquer momento        | Exibe os integrantes          |
 
 ---
 
@@ -288,7 +353,6 @@ simulador-rede/
 │   └── user_stories_v2.md
 ├── build/                 # Binarios e arquivos de cobertura (.gcda/.gcno)
 ├── coverage/              # Relatorios HTML/XML de cobertura (gerados por make test)
-├── vid.mp4                # Video de agradecimento (aberto pelo comando "autores")
 ├── Doxyfile               # Configuração do Doxygen
 ├── Makefile               # Automação: make / make test / make clean
 └── README.md
