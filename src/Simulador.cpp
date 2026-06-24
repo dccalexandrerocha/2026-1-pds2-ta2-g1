@@ -22,6 +22,7 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
+#include <filesystem>
 
 // ── Helpers locais ────────────────────────────────────────────────────────────
 
@@ -338,7 +339,7 @@ EstadoSimulacao Simulador::getEstado() const { return estado_; }
  *
  * Comandos suportados: add_no, add_enlace, iniciar, pausar,
  * retomar, proximo, injetar, falha, recuperar, metricas,
- * exportar, encerrar, ajuda.
+ * exportar, carregar, encerrar, ajuda.
  */
 void Simulador::processarComando(const std::string& linha) {
     try {
@@ -464,6 +465,12 @@ void Simulador::processarComando(const std::string& linha) {
         } else if (cmd == "encerrar") {
             encerrar();
 
+        } else if (cmd == "carregar") {
+            if (tokens.size() < 2) {
+                throw ExcecaoEntrada("Uso: carregar <arquivo.txt>");
+            }
+            carregarArquivo(tokens[1]);
+
         } else if (cmd == "autores") {
             exibirAutores();
 
@@ -489,7 +496,95 @@ void Simulador::processarComando(const std::string& linha) {
     }
 }
 
-// ── Ajuda ─────────────────────────────────────────────────────────────────────
+// ── Carregar arquivo de comandos ──────────────────────────────────────────────
+
+/**
+ * @brief Carrega comandos de um arquivo de texto e os executa em sequencia.
+ *
+ * Abre o arquivo indicado e percorre suas linhas, repassando cada uma
+ * para processarComando() exatamente como se tivesse sido digitada no
+ * terminal. Dessa forma, um arquivo com comandos add_no/add_enlace (e
+ * quaisquer outros) monta a topologia sem digitacao repetitiva.
+ *
+ * O caminho informado e resolvido para um caminho @b absoluto antes da
+ * abertura, usando std::filesystem. Isso torna o comando versatil: tanto
+ * caminhos relativos (resolvidos a partir do diretorio de trabalho atual)
+ * quanto caminhos absolutos funcionam, e o caminho completo efetivamente
+ * utilizado e exibido no terminal para facilitar a depuracao.
+ *
+ * Regras de leitura de cada linha:
+ *  - espacos em branco no inicio/fim sao ignorados (suporta arquivos CRLF);
+ *  - linhas vazias sao puladas;
+ *  - linhas que comecam com '#' sao tratadas como comentario e puladas.
+ *
+ * Como cada linha passa por processarComando() (que ja captura suas
+ * proprias excecoes), um erro em um comando individual e exibido mas nao
+ * interrompe a leitura do restante do arquivo. Se o comando "encerrar"
+ * aparecer no arquivo, a leitura para imediatamente.
+ *
+ * @param caminho Caminho do arquivo .txt (relativo ou absoluto) a carregar.
+ *
+ * @throws ExcecaoArquivo Se o caminho nao apontar para um arquivo regular
+ *                        existente ou se o arquivo nao puder ser aberto.
+ *
+ * @note O caminho e resolvido em relacao ao diretorio de trabalho atual
+ *       (de onde o executavel foi chamado), nao a raiz do projeto.
+ *
+ * @see processarComando()
+ */
+void Simulador::carregarArquivo(const std::string& caminho) {
+    namespace fs = std::filesystem;
+
+    // Resolve para caminho absoluto (relativo ao diretorio de trabalho atual).
+    std::error_code ec;
+    fs::path caminhoAbs = fs::absolute(fs::path(caminho), ec);
+    if (ec) {
+        throw ExcecaoArquivo("Caminho invalido: '" + caminho + "'");
+    }
+
+    // Normaliza '.' e '..' quando o arquivo existe (weakly_canonical nao falha
+    // se algum componente nao existir; cai no caminho absoluto bruto).
+    fs::path caminhoNorm = fs::weakly_canonical(caminhoAbs, ec);
+    if (ec) caminhoNorm = caminhoAbs;
+
+    if (!fs::is_regular_file(caminhoNorm, ec) || ec) {
+        throw ExcecaoArquivo("Arquivo nao encontrado: '" +
+                             caminhoNorm.string() + "'");
+    }
+
+    std::ifstream arquivo(caminhoNorm);
+    if (!arquivo.is_open()) {
+        throw ExcecaoArquivo("Nao foi possivel abrir o arquivo '" +
+                             caminhoNorm.string() + "'");
+    }
+
+    imprimirSeparador();
+    std::cout << "  Carregando comandos de:\n  " << caminhoNorm.string() << "\n";
+    imprimirSeparador();
+
+    std::string linha;
+    while (std::getline(arquivo, linha)) {
+        // Remove espacos/CR no inicio e no fim (suporta arquivos CRLF).
+        size_t ini = linha.find_first_not_of(" \t\r\n");
+        if (ini == std::string::npos) continue;        // linha vazia/so espacos
+        size_t fim = linha.find_last_not_of(" \t\r\n");
+        linha = linha.substr(ini, fim - ini + 1);
+
+        if (linha[0] == '#') continue;                 // comentario
+
+        std::cout << "> " << linha << "\n";            // eco do comando
+        processarComando(linha);
+
+        if (estado_ == EstadoSimulacao::ENCERRADO) break;
+    }
+
+    imprimirSeparador();
+    std::cout << "  Fim do arquivo.\n";
+    imprimirSeparador();
+    std::cout << "\n";
+}
+
+
 
 /**
  * @brief Exibe a tabela de comandos disponiveis no terminal.
@@ -523,6 +618,7 @@ void Simulador::exibirAjuda() const {
     linha("recuperar <idEnlace>",              "Restaura enlace falho");
     linha("metricas",                          "Exibe metricas no terminal");
     linha("exportar <arquivo.csv>",            "Exporta metricas para CSV");
+    linha("carregar <arquivo.txt>",            "Executa comandos de um arquivo");
     linha("encerrar",                          "Encerra a simulacao");
     linha("ajuda",                             "Exibe esta tabela");
 

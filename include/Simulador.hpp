@@ -94,6 +94,31 @@ public:
      */
     void processarComando(const std::string& linha);
 
+    /**
+     * @brief Carrega e executa comandos a partir de um arquivo de texto.
+     *
+     * Le o arquivo linha a linha e processa cada uma como se tivesse
+     * sido digitada no terminal, reaproveitando processarComando().
+     * Linhas vazias e linhas iniciadas por '#' (comentarios) sao
+     * ignoradas; espacos no inicio/fim sao removidos (suporta CRLF).
+     * Cada comando lido e ecoado no terminal antes de ser executado.
+     *
+     * O @p caminho pode ser relativo ou absoluto: internamente ele e
+     * resolvido para um caminho absoluto (via std::filesystem) a partir
+     * do diretorio de trabalho atual, o que torna o comando versatil e
+     * exibe o caminho completo efetivamente aberto.
+     *
+     * @param caminho Caminho do arquivo .txt (relativo ou absoluto).
+     *
+     * @throws ExcecaoArquivo Se o arquivo nao existir ou nao puder ser aberto.
+     *
+     * @note A resolucao e feita em relacao ao diretorio de onde o
+     *       executavel foi chamado, nao a raiz do projeto.
+     *
+     * @see processarComando()
+     */
+    void carregarArquivo(const std::string& caminho);
+
 private:
 
     /// @brief Exibe os comandos disponiveis no terminal.
